@@ -32,3 +32,8 @@ So the the identity matrix:
 Is represented as `[2,2][1,0,0,1]`.
 
 Note that shifts should always have a `number_of_columns = 1`, since you are simply moving the points.
+
+## Run
+
+A simple run:
+`go_fractals ifs-deterministic -p sample_iterated_function_system_files/barnsley_fern_ifs.txt -n 9`
