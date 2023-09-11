@@ -2,9 +2,14 @@ package IteratedFunctionSystems
 
 import (
 	"fmt"
-	"time"
 	"math/rand"
+	"math"
+	"time"
+
+	"github.com/jcocozza/go_fractals/utils"
+	"gonum.org/v1/gonum/mat"
 )
+
 
 //An IteratedFunctionSystem is a list of Transformations
 type IteratedFunctionSystem struct {
@@ -19,7 +24,7 @@ func NewIteratedFunctionSystem(transformationList []Transformation, numIteration
 	return &IteratedFunctionSystem{
 		TransformationList: transformationList,
 		NumIterations: numIterations,
-		InitialPoints: _GenerateInitialPoints(10, numDims),
+		InitialPoints: _GenerateInitialPoints(1, numDims),
 	}
 }
 
@@ -88,4 +93,54 @@ func (ifs *IteratedFunctionSystem) RunDeterministicStepWise(stepPoints [][]float
 		finalPointList = append(finalPointList, newPoints...)
 	}
 	return finalPointList
+}
+
+// Calculate the probabilities to use a given matrix in the Probabilistic method
+/*
+
+prob_weights = DET(M_1) / DET(M_1) + DET(M_2) + ...
+
+Returns a list of probabilities ordered by the order of transformations passed in
+*/
+func (ifs *IteratedFunctionSystem) CalculateProbabilities() []float64 {
+
+	determinantSum := 0.0
+	var probabilities []float64
+	for _, transform := range ifs.TransformationList {
+		determinantSum = determinantSum + math.Abs(mat.Det(&transform.Similarity))
+	}
+
+	for _, transform := range ifs.TransformationList {
+		probability := math.Abs(mat.Det(&transform.Similarity)) / determinantSum
+		probabilities = append(probabilities, probability)
+	}
+
+	return probabilities
+}
+
+// TODO Implement a "stepwise" version of this for video creation
+
+//runs the probabilistic algorithm for an Iterated Function System
+func (ifs *IteratedFunctionSystem) RunProbabilistic() [][]float64 {
+	startTime := time.Now()
+	pointsList := ifs.InitialPoints
+	mostRecentPoints := ifs.InitialPoints
+	probabilities := ifs.CalculateProbabilities()
+	//fmt.Println("probabilities:", probabilities)
+	for i := 0; i < ifs.NumIterations; i++ {
+		for j := 0; j < len(mostRecentPoints); j++ {
+			var newPoint []float64
+			idx := utils.PickRandom(probabilities) //pick an index based on the probabilities
+			newPoint, _ = ifs.TransformationList[idx].Transform(mostRecentPoints[j]) // get the transform at that index and apply to a point
+			pointsList = append(pointsList, newPoint) // keep track of all the points; we will eventually graph this
+			mostRecentPoints[j] = newPoint // we only need to apply the transformations to the next point(s) produced.
+		}
+	}
+
+	endTime := time.Now()
+	elapsedTime := endTime.Sub(startTime)
+	fmt.Println("Total number of points:", len(pointsList))
+	fmt.Printf("Elapsed time for Probabilistic algorithm: %v\n", elapsedTime)
+	//fmt.Println("Total number of points:", pointsList)
+	return pointsList
 }
