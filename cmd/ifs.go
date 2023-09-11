@@ -3,8 +3,9 @@ package cmd
 import (
 	"fmt"
 	"strings"
-	"github.com/jcocozza/go_fractals/utils"
+
 	IFS "github.com/jcocozza/go_fractals/IteratedFunctionSystems"
+	"github.com/jcocozza/go_fractals/utils"
 	viz "github.com/jcocozza/go_fractals/visualizer"
 	"github.com/spf13/cobra"
 	"gonum.org/v1/gonum/mat"
@@ -12,6 +13,8 @@ import (
 var Path string
 var numIterations int
 var createVideo bool
+var algorithmProbabilistic bool
+var algorithmDeterministic bool
 
 /* // TODO
 var out string - let user specify where the image/video writes to
@@ -21,17 +24,24 @@ var framerate int - let user specify framerate of the video
 
 func init() {
 	rootCmd.AddCommand(ifsCmd)
-	ifsCmd.Flags().StringVarP(&Path, "path", "p", "", "The path to your iterated function system file")
+
+	ifsCmd.Flags().BoolVar(&algorithmProbabilistic, "algo-p", false, "[OPTIONAL] Use the probabilistic algorithm")
+	ifsCmd.Flags().BoolVar(&algorithmDeterministic, "algo-d", false, "[OPTIONAL] Use the deterministic algorithm")
+	ifsCmd.MarkFlagsMutuallyExclusive("algo-p", "algo-d")
+	ifsCmd.MarkFlagRequired("algorithm-probabilistic")
+	ifsCmd.MarkFlagRequired("algorithm-deterministic")
+
+	ifsCmd.Flags().StringVarP(&Path, "path", "p", "", "[REQUIRED] The path to your iterated function system file")
 	ifsCmd.MarkFlagRequired("path")
 
-	ifsCmd.Flags().IntVarP(&numIterations, "numItr", "n", 1, "[OPTIONAL] The number of iterations you want to use. When using the deterministic algorithm this should be relatively low because of exponential growth.")
+	ifsCmd.Flags().IntVarP(&numIterations, "numItr", "n", 1, "[OPTIONAL] The number of iterations you want to use. Deterministic algorithm: relatively low because of exponential growth.")
 
-	ifsCmd.Flags().BoolVarP(&createVideo, "video","v", false, "[OPTIONAL] Whether to create a video or not (default false)")
+	ifsCmd.Flags().BoolVarP(&createVideo, "video","v", false, "[OPTIONAL] Whether to create a video or not")
 }
 
 var ifsCmd = &cobra.Command{
-	Use: "ifs-deterministic",
-	Short: "Run an iterated function system using the deterministic algorithm",
+	Use: "ifs",
+	Short: "Run an iterated function system",
 	Long: "Pass in a file that contains an iterated function system",
 	Args: cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
@@ -60,6 +70,7 @@ var ifsCmd = &cobra.Command{
 
 			transformationList = append(transformationList, *transform)
 		}
+
 		newIfs := IFS.NewIteratedFunctionSystem(transformationList, numIterations, dimension)
 		const width, height = 1000,1000
 		if createVideo { // unless the user passes in true, don't create the video
@@ -68,10 +79,18 @@ var ifsCmd = &cobra.Command{
 			fv.WriteVideoImages(10)
 			fv.CreateVideo()
 		} else {
-			pointsList := newIfs.RunDeterministic()
 
-			fractal := viz.NewFractalImage(width, height, "my_fractal.png", pointsList)
-			fractal.WriteImage()
+			if algorithmProbabilistic {
+				pointsList := newIfs.RunProbabilistic()
+				fractal := viz.NewFractalImage(width, height, "my_fractal.png", pointsList)
+				fractal.WriteImage()
+			} else if algorithmDeterministic{
+				pointsList := newIfs.RunDeterministic()
+				fractal := viz.NewFractalImage(width, height, "my_fractal.png", pointsList)
+				fractal.WriteImage()
+			} else {
+				panic("No other algorithm to use!!")
+			}
 		}
 	},
 }
