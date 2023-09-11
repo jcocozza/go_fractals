@@ -1,0 +1,3 @@
+# cmd
+
+The CLI.
