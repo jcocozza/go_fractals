@@ -12,6 +12,9 @@ import (
 var Path string
 var numIterations int
 var createVideo bool
+var PointsOutput string
+var SavePointsBool bool
+
 
 /* // TODO
 var out string - let user specify where the image/video writes to
@@ -27,6 +30,10 @@ func init() {
 	ifsCmd.Flags().IntVarP(&numIterations, "numItr", "n", 1, "[OPTIONAL] The number of iterations you want to use. When using the deterministic algorithm this should be relatively low because of exponential growth.")
 
 	ifsCmd.Flags().BoolVarP(&createVideo, "video","v", false, "[OPTIONAL] Whether to create a video or not (default false)")
+
+	ifsCmd.Flags().BoolVarP(&SavePointsBool, "savePoints", "s", false, "[OPTIONAL] Write the set of points to the specified output file")
+	ifsCmd.Flags().StringVarP(&PointsOutput, "pointOutput", "o", "output.txt", "[REQUIRED - if writing points] Write the set of points to the specified output file")
+	ifsCmd.MarkFlagsRequiredTogether("savePoints", "pointOutput")
 }
 
 var ifsCmd = &cobra.Command{
@@ -62,6 +69,13 @@ var ifsCmd = &cobra.Command{
 		}
 		newIfs := IFS.NewIteratedFunctionSystem(transformationList, numIterations, dimension)
 		const width, height = 1000,1000
+
+		if SavePointsBool {
+			pointsList := newIfs.RunDeterministic()
+			utils.Writer("output.txt", pointsList)
+			return
+		}
+
 		if createVideo { // unless the user passes in true, don't create the video
 			fv := viz.NewFractalVideo(width, height, "my_fractal_video.mp4", *newIfs)
 
