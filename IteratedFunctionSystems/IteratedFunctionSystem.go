@@ -58,7 +58,7 @@ func (ifs *IteratedFunctionSystem) Transform(point []float64) [][]float64 {
 		tempPoint, _ := ifs.TransformationList[i].Transform(point)
 		pointTransformationList[i] = tempPoint
 	}
-	fmt.Println("Created Transformation Points:", pointTransformationList)
+	//fmt.Println("Created Transformation Points:", pointTransformationList)
 	return pointTransformationList
 }
 
@@ -143,4 +143,17 @@ func (ifs *IteratedFunctionSystem) RunProbabilistic() [][]float64 {
 	fmt.Printf("Elapsed time for Probabilistic algorithm: %v\n", elapsedTime)
 	//fmt.Println("Total number of points:", pointsList)
 	return pointsList
+}
+
+func (ifs *IteratedFunctionSystem) RunProbabilisticStepWise(stepPoints [][]float64) [][]float64 {
+	mostRecentPoints := stepPoints
+	probabilities := ifs.CalculateProbabilities() // TODO remove this so it doesn't need to be calculated every time
+
+	for j := 0; j < len(mostRecentPoints); j++ {
+		var newPoint []float64
+		idx := utils.PickRandom(probabilities) //pick an index based on the probabilities
+		newPoint, _ = ifs.TransformationList[idx].Transform(mostRecentPoints[j]) // get the transform at that index and apply to a point
+		mostRecentPoints[j] = newPoint // we only need to apply the transformations to the next point(s) produced.
+	}
+	return mostRecentPoints // we only want the most recent set of points
 }
