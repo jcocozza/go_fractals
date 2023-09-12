@@ -2,8 +2,10 @@ package visualizer
 
 import (
 	"fmt"
-	IFS "github.com/jcocozza/go_fractals/IteratedFunctionSystems"
 	"os/exec"
+
+	IFS "github.com/jcocozza/go_fractals/IteratedFunctionSystems"
+	"github.com/jcocozza/go_fractals/utils"
 )
 
 type FractalVideo struct {
@@ -11,39 +13,68 @@ type FractalVideo struct {
 	Height int
 	Path string
 	IFSys IFS.IteratedFunctionSystem
+	FrameRate int
 }
 
-func NewFractalVideo(width int, height int, path string, ifs IFS.IteratedFunctionSystem) *FractalVideo {
+// An Algorithm is a function that takes in a list of points and returns a list of points
+type Algorithm func([][]float64) [][]float64
+
+func VideoWrapper(width int, height int, fileName string, ifs IFS.IteratedFunctionSystem, stepWiseAlgo Algorithm, frameRate int, progressCh chan int) {
+	fv := newFractalVideo(width, height, fileName, ifs, frameRate)
+
+	pointAccumulator := fv.IFSys.InitialPoints
+	newPoints := fv.IFSys.InitialPoints
+	// write the initial conditions
+	fractal := NewFractalImage(fv.Width, fv.Height, "video/image0.png", pointAccumulator)
+	fractal.WriteImage()
+
+	for i := 0; i < fv.IFSys.NumIterations; i ++ {
+		newPoints = stepWiseAlgo(newPoints)
+		pointAccumulator = append(pointAccumulator, newPoints...)
+		//fmt.Println("POINT SET:", pointAccumulator)
+		fractal := NewFractalImage(fv.Width, fv.Height, fmt.Sprintf("video/image%d.png", i), pointAccumulator)
+		fractal.WriteImage()
+		progressCh <- (i + 1)
+	}
+	//fv.writeVideoImages(stepWiseAlgo)
+	fv.createVideo()
+	progressCh <- fv.IFSys.NumIterations + 1
+	close(progressCh)
+}
+
+func newFractalVideo(width int, height int, path string, ifs IFS.IteratedFunctionSystem, frameRate int) *FractalVideo {
 	return &FractalVideo{
 		Width: width,
 		Height: height,
 		Path: path,
 		IFSys: ifs,
+		FrameRate: frameRate,
 	}
 }
 
 //WriteVideoImages will run the deterministic algorithm one step at a time and save an image at each step
-func (fv *FractalVideo) WriteVideoImages(numIterations int) {
-	pointsList := fv.IFSys.InitialPoints
-
+func (fv *FractalVideo) writeVideoImages(stepWiseAlgo Algorithm) {
+	pointAccumulator := fv.IFSys.InitialPoints
+	newPoints := fv.IFSys.InitialPoints
 	// write the initial conditions
-	fractal := NewFractalImage(fv.Width, fv.Height, "video/image0.png", pointsList)
+	fractal := NewFractalImage(fv.Width, fv.Height, "video/image0.png", pointAccumulator)
 	fractal.WriteImage()
 
-	for i := 0; i < numIterations; i ++ {
-		pointsList = fv.IFSys.RunDeterministicStepWise(pointsList)
-		fractal := NewFractalImage(fv.Width, fv.Height, fmt.Sprintf("video/image%d.png", i), pointsList)
+	for i := 0; i < fv.IFSys.NumIterations; i ++ {
+		newPoints = stepWiseAlgo(newPoints)
+		pointAccumulator = append(pointAccumulator, newPoints...)
+		fractal := NewFractalImage(fv.Width, fv.Height, fmt.Sprintf("video/image%d.png", i), pointAccumulator)
 		fractal.WriteImage()
 	}
 }
 
 //CreateVideo combine the images into a video
-func (fv *FractalVideo) CreateVideo() {
+func (fv *FractalVideo) createVideo() {
 	inputPattern := "video/image%01d.png"
 	outputVideo := fv.Path
 
     cmd := exec.Command("ffmpeg",
-        "-framerate", "1",            // Frame rate
+        "-framerate", fmt.Sprint(fv.FrameRate),            // Frame rate
         "-i", inputPattern,           // Input image pattern
         "-c:v", "libx264",            // Video codec
         "-pix_fmt", "yuv420p",        // Pixel format
@@ -52,7 +83,7 @@ func (fv *FractalVideo) CreateVideo() {
 	err := cmd.Run()
 	if err != nil {
 		fmt.Println("Error:", err)
-	} else {
-		fmt.Println("Fractal Video Created")
 	}
+	//fmt.Println("Fractal Video Created")
+	utils.DeleteFiles("video", "imag*.png") // clean up images afterwards
 }

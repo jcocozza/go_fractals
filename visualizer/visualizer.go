@@ -71,5 +71,5 @@ func (fi *FractalImage) WriteImage() {
 	defer outputFile.Close()
 	png.Encode(outputFile, fi.Img)
 
-	fmt.Println("Fractal image saved as:", fi.Path)
+	//fmt.Println("Fractal image saved as:", fi.Path)
 }
