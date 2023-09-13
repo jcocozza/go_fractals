@@ -80,39 +80,55 @@ var ifsCmd = &cobra.Command{
 		newIfs := IFS.NewIteratedFunctionSystem(transformationList, numIterations, dimension)
 		const width, height = 1000,1000
 
-		if algorithmProbabilistic {
-			if createVideo {
-				progressCh := make(chan int)
-				go viz.VideoWrapper(width, height, "my_fractal_video.mp4", *newIfs, newIfs.RunProbabilisticStepWise, frameRate, progressCh)
+		if dimension == 3 {
+			if algorithmDeterministic {
+				pointsList := newIfs.RunDeterministic()
+				viz.Draw3D(pointsList)
+				return
+			} else if algorithmProbabilistic {
+				pointsList := newIfs.RunProbabilistic()
+				viz.Draw3D(pointsList)
+				return
+			} else {
+				panic("No other algorithm to use!!")
+			}
 
-				// Monitor the progress channel and update the progress bar
-				for progress := range progressCh {
-					bar.Set(progress)
+		} else if dimension == 2 {
+
+			if algorithmProbabilistic {
+				if createVideo {
+					progressCh := make(chan int)
+					go viz.VideoWrapper(width, height, "my_fractal_video.mp4", *newIfs, newIfs.RunProbabilisticStepWise, frameRate, progressCh)
+
+					// Monitor the progress channel and update the progress bar
+					for progress := range progressCh {
+						bar.Set(progress)
+					}
+					// Finish the progress bar when the Goroutine is done
+					bar.Finish()
+					return
 				}
-				// Finish the progress bar when the Goroutine is done
-				bar.Finish()
-				return
-			}
-			pointsList := newIfs.RunProbabilistic()
-			fractal := viz.NewFractalImage(width, height, "my_fractal.png", pointsList)
-			fractal.WriteImage()
-		} else if algorithmDeterministic {
-			if createVideo {
-				progressCh := make(chan int)
-				go viz.VideoWrapper(width, height, "my_fractal_video.mp4", *newIfs, newIfs.RunDeterministicStepWise, frameRate, progressCh)
-				// Monitor the progress channel and update the progress bar
-				for progress := range progressCh {
-					bar.Set(progress)
+				pointsList := newIfs.RunProbabilistic()
+				fractal := viz.NewFractalImage(width, height, "my_fractal.png", pointsList)
+				fractal.WriteImage()
+			} else if algorithmDeterministic {
+				if createVideo {
+					progressCh := make(chan int)
+					go viz.VideoWrapper(width, height, "my_fractal_video.mp4", *newIfs, newIfs.RunDeterministicStepWise, frameRate, progressCh)
+					// Monitor the progress channel and update the progress bar
+					for progress := range progressCh {
+						bar.Set(progress)
+					}
+					// Finish the progress bar when the Goroutine is done
+					bar.Finish()
+					return
 				}
-				// Finish the progress bar when the Goroutine is done
-				bar.Finish()
-				return
+				pointsList := newIfs.RunDeterministic()
+				fractal := viz.NewFractalImage(width, height, "my_fractal.png", pointsList)
+				fractal.WriteImage()
+			} else {
+				panic("No other algorithm to use!!")
 			}
-			pointsList := newIfs.RunDeterministic()
-			fractal := viz.NewFractalImage(width, height, "my_fractal.png", pointsList)
-			fractal.WriteImage()
-		} else {
-			panic("No other algorithm to use!!")
 		}
 	},
 }

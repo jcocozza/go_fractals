@@ -21,6 +21,16 @@ var (
     rotationZ float32
 )
 
+func normalizePointsList(pointsList [][]float64) []float32 {
+	var normalizedPointsList []float32
+	for _, point := range pointsList {
+		for _, coord := range point {
+			normalizedPointsList = append(normalizedPointsList, float32(coord))
+		}
+	}
+	return normalizedPointsList
+}
+
 var keys = make(map[glfw.Key]bool)
 // Key callback function
 func keyCallback(w *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
@@ -31,8 +41,10 @@ func keyCallback(w *glfw.Window, key glfw.Key, scancode int, action glfw.Action,
     }
 }
 // Draw a set of 3D points
-func Draw3D(points []float32) {
+func Draw3D(pointsList [][]float64) {
 	runtime.LockOSThread()
+
+	points := normalizePointsList(pointsList)
 
 	if err := glfw.Init(); err != nil {
 		log.Fatal(err)
