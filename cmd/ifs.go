@@ -18,11 +18,11 @@ var createVideo bool
 var algorithmProbabilistic bool
 var algorithmDeterministic bool
 var frameRate int
+var probabilitiesList []float64
 
 /* // TODO
 var out string - let user specify where the image/video writes to
 var width, height int - let user specify width, height of image/video
-var framerate int - let user specify framerate of the video
 */
 
 func init() {
@@ -37,11 +37,16 @@ func init() {
 	ifsCmd.Flags().StringVarP(&Path, "path", "p", "", "[REQUIRED] The path to your iterated function system file")
 	ifsCmd.MarkFlagRequired("path")
 
-	ifsCmd.Flags().IntVarP(&numIterations, "numItr", "n", 1, "[OPTIONAL] The number of iterations you want to use. Deterministic algorithm: relatively low because of exponential growth.")
+	ifsCmd.Flags().IntVarP(&numIterations, "numItr", "n", 1, "[OPTIONAL] The number of iterations you want to use.")
 
 	ifsCmd.Flags().BoolVarP(&createVideo, "video","v", false, "[OPTIONAL] Whether to create a video or not")
 
 	ifsCmd.Flags().IntVarP(&frameRate, "fps", "f", 10, "[OPTIONAL] The framerate of the video.")
+
+	ifsCmd.Flags().Float64SliceVar(&probabilitiesList, "probabilities", []float64{}, "[OPTIONAL - comma separated] Specify probabilities of transformations. Must add to 1. If none will calculated based on matrices. Note that a determinant of zero can cause unexpected things.")
+	ifsCmd.MarkFlagsMutuallyExclusive("algo-d", "probabilities")
+	ifsCmd.MarkFlagsMutuallyExclusive("probabilities", "video")
+
 }
 
 var ifsCmd = &cobra.Command{
@@ -50,7 +55,6 @@ var ifsCmd = &cobra.Command{
 	Long: "Pass in a file that contains an iterated function system",
 	Args: cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
-		bar := BAR.Default(int64(numIterations + 1), "Generating Fractals...")
 		//fmt.Println("Reading from file:", Path)
 
 		rowMatches := utils.Reader(Path, `\[(.*?)\]`)
@@ -77,6 +81,19 @@ var ifsCmd = &cobra.Command{
 			transformationList = append(transformationList, *transform)
 		}
 
+		if len(probabilitiesList) != 0 && len(probabilitiesList) != len(transformationList) {
+			panic("You must pass as many probabilities as there are transforms")
+		}
+
+		probSum := 0.0
+		for _, prob := range probabilitiesList {
+			probSum += prob
+		}
+
+		if len(probabilitiesList) != 0 && probSum != 1 {
+			panic("Passed probabilities must sum to 1")
+		}
+
 		newIfs := IFS.NewIteratedFunctionSystem(transformationList, numIterations, dimension)
 		const width, height = 1000,1000
 
@@ -86,9 +103,16 @@ var ifsCmd = &cobra.Command{
 				viz.Draw3D(pointsList)
 				return
 			} else if algorithmProbabilistic {
-				pointsList := newIfs.RunProbabilistic()
-				viz.Draw3D(pointsList)
-				return
+				if len(probabilitiesList) == 0 {
+					pointsList := newIfs.RunProbabilistic(newIfs.CalculateProbabilities())
+					viz.Draw3D(pointsList)
+					return
+				} else {
+					pointsList := newIfs.RunProbabilistic(probabilitiesList)
+					viz.Draw3D(pointsList)
+					return
+				}
+
 			} else {
 				panic("No other algorithm to use!!")
 			}
@@ -97,6 +121,7 @@ var ifsCmd = &cobra.Command{
 
 			if algorithmProbabilistic {
 				if createVideo {
+					bar := BAR.Default(int64(numIterations + 1), "Generating Fractals...")
 					progressCh := make(chan int)
 					go viz.VideoWrapper(width, height, "my_fractal_video.mp4", *newIfs, newIfs.RunProbabilisticStepWise, frameRate, progressCh)
 
@@ -108,11 +133,20 @@ var ifsCmd = &cobra.Command{
 					bar.Finish()
 					return
 				}
-				pointsList := newIfs.RunProbabilistic()
-				fractal := viz.NewFractalImage(width, height, "my_fractal.png", pointsList)
-				fractal.WriteImage()
+
+				if len(probabilitiesList) == 0 {
+					pointsList := newIfs.RunProbabilistic(newIfs.CalculateProbabilities())
+					fractal := viz.NewFractalImage(width, height, "my_probabilistic_fractal.png", pointsList)
+					fractal.WriteImage()
+				} else {
+					pointsList := newIfs.RunProbabilistic(probabilitiesList)
+					fractal := viz.NewFractalImage(width, height, "my_probabilistic_fractal.png", pointsList)
+					fractal.WriteImage()
+				}
+
 			} else if algorithmDeterministic {
 				if createVideo {
+					bar := BAR.Default(int64(numIterations + 1), "Generating Fractals...")
 					progressCh := make(chan int)
 					go viz.VideoWrapper(width, height, "my_fractal_video.mp4", *newIfs, newIfs.RunDeterministicStepWise, frameRate, progressCh)
 					// Monitor the progress channel and update the progress bar
@@ -124,7 +158,7 @@ var ifsCmd = &cobra.Command{
 					return
 				}
 				pointsList := newIfs.RunDeterministic()
-				fractal := viz.NewFractalImage(width, height, "my_fractal.png", pointsList)
+				fractal := viz.NewFractalImage(width, height, "my_deterministic_fractal.png", pointsList)
 				fractal.WriteImage()
 			} else {
 				panic("No other algorithm to use!!")
