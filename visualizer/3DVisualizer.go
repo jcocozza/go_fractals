@@ -21,11 +21,11 @@ var (
     rotationZ float32
 )
 
-func normalizePointsList(pointsList [][]float64) []float32 {
+func normalizePointsList(pointsList [][]float64, scalingFactor float32) []float32 {
 	var normalizedPointsList []float32
 	for _, point := range pointsList {
 		for _, coord := range point {
-			normalizedPointsList = append(normalizedPointsList, float32(coord))
+			normalizedPointsList = append(normalizedPointsList, scalingFactor * float32(coord))
 		}
 	}
 	return normalizedPointsList
@@ -44,7 +44,7 @@ func keyCallback(w *glfw.Window, key glfw.Key, scancode int, action glfw.Action,
 func Draw3D(pointsList [][]float64) {
 	runtime.LockOSThread()
 
-	points := normalizePointsList(pointsList)
+	points := normalizePointsList(pointsList, 5.0)
 
 	if err := glfw.Init(); err != nil {
 		log.Fatal(err)
@@ -58,7 +58,7 @@ func Draw3D(pointsList [][]float64) {
     glfw.WindowHint(glfw.Resizable, glfw.True)
     glfw.WindowHint(glfw.ContextVersionMajor, 3)
     glfw.WindowHint(glfw.ContextVersionMinor, 2)
-	window, err := glfw.CreateWindow(1000, 200, "3D Plot", nil, nil)
+	window, err := glfw.CreateWindow(1000, 1000, "3D Plot", nil, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -83,7 +83,7 @@ func Draw3D(pointsList [][]float64) {
 		#version 410
 		out vec4 frag_color;
 		void main() {
-			frag_color = vec4(1.0, 1.0, 1.0, 1.0); // Point color (white in this case)
+			frag_color = vec4(0.0, 1.0, 0.0, 1.0); // Point color (green in this case)
 		}
 	`
 
@@ -118,15 +118,15 @@ func Draw3D(pointsList [][]float64) {
 		axisVertices := []float32{
 			// X-axis
 			0.0, 0.0, 0.0, // Start point
-			1.0, 0.0, 0.0, // End point
+			5.0, 0.0, 0.0, // End point
 
 			// Y-axis
 			0.0, 0.0, 0.0, // Start point
-			0.0, 1.0, 0.0, // End point
+			0.0, 5.0, 0.0, // End point
 
 			// Z-axis
 			0.0, 0.0, 0.0, // Start point
-			0.0, 0.0, 1.0, // End point
+			0.0, 0.0, 5.0, // End point
 		}
 
 		// Create a VBO for the axes
@@ -174,7 +174,7 @@ func Draw3D(pointsList [][]float64) {
 
 		// Inside the main loop
 		if window.GetKey(glfw.KeyLeft) == glfw.Press {
-			//fmt.Println("KEY PRESSED LEFT")
+			//fmt.Println("KEY PRESSED LEFT")g
 			rotationY += 1.0 // Adjust the rotation angle as needed
 		}
 		if window.GetKey(glfw.KeyRight) == glfw.Press {
@@ -190,7 +190,6 @@ func Draw3D(pointsList [][]float64) {
 			rotationX += -1.0 // Adjust the rotation angle as needed
 		}
 		// Add more conditions for other keys or axes
-
 
 		// Create a buffer for the points
 		var vbo uint32
