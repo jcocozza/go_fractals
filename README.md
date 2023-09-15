@@ -2,6 +2,27 @@
 
 This is some code to build fractals using iterated function systems.
 
+## Usage
+
+```
+% go_fractals ifs --help
+
+Pass in a file that contains an iterated function system
+
+Usage:
+  go_fractals ifs [flags]
+
+Flags:
+      --algo-d                       [OPTIONAL] Use the deterministic algorithm
+      --algo-p                       [OPTIONAL] Use the probabilistic algorithm
+  -f, --fps int                      [OPTIONAL] The framerate of the video. (default 10)
+  -h, --help                         help for ifs
+  -n, --numItr int                   [OPTIONAL] The number of iterations you want to use. (default 1)
+  -p, --path string                  [REQUIRED] The path to your iterated function system file
+      --probabilities float64Slice   [OPTIONAL - comma separated] Specify probabilities of transformations. Must add to 1. If none will calculated based on matrices. Note that a determinant of zero can cause unexpected things. (default [])
+  -v, --video                        [OPTIONAL] Whether to create a video or not
+```
+
 ## Building Fractals with Iterated Function Systems
 
 The CLI tool revolves around the user generated file (you can call it whatever you like when you pass it into the CLI).
@@ -33,7 +54,24 @@ Is represented as `[2,2][1,0,0,1]`.
 
 Note that shifts should always have a `number_of_columns = 1`, since you are simply moving the points.
 
-## Run
+## Example
 
-A simple run:
-`go_fractals ifs-deterministic -p sample_iterated_function_system_files/barnsley_fern_ifs.txt -n 9`
+Here are several ways to generate the barnsley fern which is represented by the following IFS:
+
+```
+[2,2][0,0,0,.16] + [2,1][0,0]
+[2,2][.85,0.04,-.04,.85] + [2,1][0,1.6]
+[2,2][0.2,-.26,.23,.22] + [2,1][0,1.6]
+[2,2][-.15,.28,.26,.24] + [2,1][0,.44]
+```
+
+The deterministic algorithm:
+1) `go_fractals ifs -p sample_iterated_function_system_files/barnsley_fern_ifs.txt --algo-d -n 13`
+
+The probabilistic algorithm:
+
+2) `go_fractals ifs -p sample_iterated_function_system_files/barnsley_fern_ifs.txt --algo-p -n 67108864`
+
+The probabilistic algorithm with custom probabilities for each transformation (This will do a better job of adding the stem compared to the probabilistic algorithm alone):
+
+3) `go_fractals ifs -p sample_iterated_function_system_files/barnsley_fern_ifs.txt --algo-p -n 67108864 --probabilities .1,.67,.115,.115`

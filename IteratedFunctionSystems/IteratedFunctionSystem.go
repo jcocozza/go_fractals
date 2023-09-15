@@ -73,13 +73,17 @@ func (ifs *IteratedFunctionSystem) RunDeterministic() [][]float64 {
 			newPoints := ifs.Transform(pointsList[j])
 			tempPointList = append(tempPointList, newPoints...)
 		}
-		pointsList = tempPointList
+		if len(ifs.TransformationList) == 1{
+			pointsList = append(pointsList, tempPointList...) // allow the deterministic algorithm to work with 1 transformation
+		} else {
+			pointsList = tempPointList
+		}
 		//fmt.Println("Point Space:", pointsList)
 	}
 	endTime := time.Now()
-
 	elapsedTime := endTime.Sub(startTime)
 	fmt.Println("Total number of points:", len(pointsList))
+	//fmt.Println("Total number of Unique points:", utils.CalculateUniqueListElements(pointsList))
 	fmt.Printf("Elapsed time for Deterministic algorithm: %v\n", elapsedTime)
 	return pointsList
 }
@@ -118,15 +122,32 @@ func (ifs *IteratedFunctionSystem) CalculateProbabilities() []float64 {
 	return probabilities
 }
 
-// TODO Implement a "stepwise" version of this for video creation
+// Calculate probabilities -- possibly a way to handle to determinant of 0 problem
+func (ifs *IteratedFunctionSystem) CalculateProbabilitiesTEST() []float64 {
+    determinantSum := 0.0
+    epsilon := 1e-6 // Small epsilon value to ensure nonzero probabilities
+
+    var probabilities []float64
+    for _, transform := range ifs.TransformationList {
+        determinant := math.Abs(mat.Det(&transform.Similarity))
+        determinantSum += determinant
+    }
+
+    for _, transform := range ifs.TransformationList {
+        determinant := math.Abs(mat.Det(&transform.Similarity))
+        probability := (determinant + epsilon) / (determinantSum + epsilon*float64(len(ifs.TransformationList)))
+        probabilities = append(probabilities, probability)
+    }
+
+    return probabilities
+}
 
 //runs the probabilistic algorithm for an Iterated Function System
-func (ifs *IteratedFunctionSystem) RunProbabilistic() [][]float64 {
+func (ifs *IteratedFunctionSystem) RunProbabilistic(probabilities []float64) [][]float64 {
 	startTime := time.Now()
 	pointsList := ifs.InitialPoints
 	mostRecentPoints := ifs.InitialPoints
-	probabilities := ifs.CalculateProbabilities()
-	//fmt.Println("probabilities:", probabilities)
+	fmt.Println("probabilities:", probabilities)
 	for i := 0; i < ifs.NumIterations; i++ {
 		for j := 0; j < len(mostRecentPoints); j++ {
 			var newPoint []float64
@@ -136,12 +157,11 @@ func (ifs *IteratedFunctionSystem) RunProbabilistic() [][]float64 {
 			mostRecentPoints[j] = newPoint // we only need to apply the transformations to the next point(s) produced.
 		}
 	}
-
 	endTime := time.Now()
 	elapsedTime := endTime.Sub(startTime)
 	fmt.Println("Total number of points:", len(pointsList))
+	//fmt.Println("Total number of Unique points:", utils.CalculateUniqueListElements(pointsList))
 	fmt.Printf("Elapsed time for Probabilistic algorithm: %v\n", elapsedTime)
-	//fmt.Println("Total number of points:", pointsList)
 	return pointsList
 }
 
