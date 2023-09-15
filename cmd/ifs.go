@@ -19,6 +19,8 @@ var algorithmProbabilistic bool
 var algorithmDeterministic bool
 var frameRate int
 var probabilitiesList []float64
+var random bool
+var numTransforms int
 
 /* // TODO
 var out string - let user specify where the image/video writes to
@@ -29,13 +31,13 @@ func init() {
 	rootCmd.AddCommand(ifsCmd)
 
 	ifsCmd.Flags().BoolVar(&algorithmProbabilistic, "algo-p", false, "[OPTIONAL] Use the probabilistic algorithm")
-	ifsCmd.Flags().BoolVar(&algorithmDeterministic, "algo-d", false, "[OPTIONAL] Use the deterministic algorithm")
+	ifsCmd.Flags().BoolVar(&algorithmDeterministic, "algo-d", true, "[OPTIONAL] Use the deterministic algorithm")
 	ifsCmd.MarkFlagsMutuallyExclusive("algo-p", "algo-d")
-	ifsCmd.MarkFlagRequired("algorithm-probabilistic")
-	ifsCmd.MarkFlagRequired("algorithm-deterministic")
+	//ifsCmd.MarkFlagRequired("algorithm-probabilistic")
+	//ifsCmd.MarkFlagRequired("algorithm-deterministic")
 
 	ifsCmd.Flags().StringVarP(&Path, "path", "p", "", "[REQUIRED] The path to your iterated function system file")
-	ifsCmd.MarkFlagRequired("path")
+	//ifsCmd.MarkFlagRequired("path")
 
 	ifsCmd.Flags().IntVarP(&numIterations, "numItr", "n", 1, "[OPTIONAL] The number of iterations you want to use.")
 
@@ -46,6 +48,12 @@ func init() {
 	ifsCmd.Flags().Float64SliceVar(&probabilitiesList, "probabilities", []float64{}, "[OPTIONAL - comma separated] Specify probabilities of transformations. Must add to 1. If none will calculated based on matrices. Note that a determinant of zero can cause unexpected things.")
 	ifsCmd.MarkFlagsMutuallyExclusive("algo-d", "probabilities")
 	ifsCmd.MarkFlagsMutuallyExclusive("probabilities", "video")
+
+
+	ifsCmd.Flags().BoolVarP(&random, "random","r", false, "[OPTIONAL] Create a random 2D Iterated Function system using the probabilistic algorithm")
+	//ifsCmd.MarkFlagsMutuallyExclusive("random", "video", "probabilities", "fps", "algo-p", "algo-d", "path")
+	ifsCmd.Flags().IntVarP(&numTransforms, "numTransforms", "t", 2, "[OPTIONAL] The number of transforms to randomly generate.")
+	//rootCmd.MarkFlagsRequiredTogether("random", "numTransforms")
 
 }
 
@@ -93,9 +101,18 @@ var ifsCmd = &cobra.Command{
 		if len(probabilitiesList) != 0 && probSum != 1 {
 			panic("Passed probabilities must sum to 1")
 		}
+		const width, height = 1000,1000
+
+		if random {
+			randIFS := IFS.GenerateRandomIFS(2, numTransforms)
+			pointsList := randIFS.RunProbabilistic(randIFS.CalculateProbabilities())
+			//fmt.Println("POints list", pointsList[1])
+			fractal := viz.NewFractalImage(width, height, "my_random_fractal.png", pointsList)
+			fractal.WriteImage()
+			return
+		}
 
 		newIfs := IFS.NewIteratedFunctionSystem(transformationList, numIterations, dimension)
-		const width, height = 1000,1000
 
 		if dimension == 3 {
 			if algorithmDeterministic {
