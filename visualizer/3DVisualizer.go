@@ -21,11 +21,13 @@ var (
     rotationZ float32
 )
 
+const width, height, scaler = 1000,1000,5
+
 func normalizePointsList(pointsList [][]float64, scalingFactor float32) []float32 {
 	var normalizedPointsList []float32
 	for _, point := range pointsList {
 		for _, coord := range point {
-			normalizedPointsList = append(normalizedPointsList, scalingFactor * float32(coord))
+			normalizedPointsList = append(normalizedPointsList, (scalingFactor * float32(coord)))
 		}
 	}
 	return normalizedPointsList
@@ -44,13 +46,12 @@ func keyCallback(w *glfw.Window, key glfw.Key, scancode int, action glfw.Action,
 func Draw3D(pointsList [][]float64) {
 	runtime.LockOSThread()
 
-	points := normalizePointsList(pointsList, 5.0)
+	points := normalizePointsList(pointsList, scaler)
 
 	if err := glfw.Init(); err != nil {
 		log.Fatal(err)
 	}
 	defer glfw.Terminate()
-
 
 	glfw.WindowHint(glfw.OpenGLForwardCompatible,glfw.True);
 	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
@@ -58,7 +59,7 @@ func Draw3D(pointsList [][]float64) {
     glfw.WindowHint(glfw.Resizable, glfw.True)
     glfw.WindowHint(glfw.ContextVersionMajor, 3)
     glfw.WindowHint(glfw.ContextVersionMinor, 2)
-	window, err := glfw.CreateWindow(1000, 1000, "3D Plot", nil, nil)
+	window, err := glfw.CreateWindow(width, height, "3D Plot", nil, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -145,7 +146,6 @@ func Draw3D(pointsList [][]float64) {
 		gl.EnableVertexAttribArray(positionAttribAxes)
 		gl.BindBuffer(gl.ARRAY_BUFFER, vboAxes)
 		gl.VertexAttribPointer(positionAttribAxes, 3, gl.FLOAT, false, 0, nil)
-
 
 		gl.UseProgram(program)
 
