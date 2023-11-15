@@ -75,3 +75,13 @@ The probabilistic algorithm:
 The probabilistic algorithm with custom probabilities for each transformation (This will do a better job of adding the stem compared to the probabilistic algorithm alone):
 
 3) `go_fractals ifs -p sample_iterated_function_system_files/barnsley_fern_ifs.txt --algo-p -n 67108864 --probabilities .1,.67,.115,.115`
+
+And here it is:
+
+![image](./sample_iterated_function_system_files/images/barnsley_fern.png)
+
+
+## .stl files:
+
+Here's an example of a .stl produced by the stack maker:
+![image](./sample_iterated_function_system_files/images/stack/stack.png)

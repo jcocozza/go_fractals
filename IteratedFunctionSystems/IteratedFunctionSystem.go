@@ -19,12 +19,11 @@ type IteratedFunctionSystem struct {
 }
 
 //NewIteratedFunctionSystem creates an iterated function system. It defaults to 1 initial point
-// TODO Allow user to specify initial point(s)
-func NewIteratedFunctionSystem(transformationList []Transformation, numIterations int, numDims int) (*IteratedFunctionSystem) {
+func NewIteratedFunctionSystem(transformationList []Transformation, numIterations int, numPoints int, numDims int) (*IteratedFunctionSystem) {
 	return &IteratedFunctionSystem{
 		TransformationList: transformationList,
 		NumIterations: numIterations,
-		InitialPoints: _GenerateInitialPoints(1, numDims),
+		InitialPoints: _GenerateInitialPoints(numPoints, numDims),
 	}
 }
 
