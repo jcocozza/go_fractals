@@ -85,3 +85,7 @@ And here it is:
 
 Here's an example of a .stl produced by the stack maker:
 ![image](./sample_iterated_function_system_files/images/stack/stack.png)
+
+
+## Videos
+![video](./sample_iterated_function_system_files/images/video.mp4)
