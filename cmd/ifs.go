@@ -112,7 +112,27 @@ var ifsCmd = &cobra.Command{
 			// Construct the path to the Downloads folder
 			downloadsPath := filepath.Join(homeDir, "Downloads")
 
-			stack.CreateFractalStack(Path, numStacks, thickness, downloadsPath+"/out.stl")
+			if numStacks == 1 { // in the case of a stack with length 1, we really just want to thicken a fractal after it's algorithm has been run
+				// choice of which algorithm generates the points in the case of the fractal thickening
+				if algorithmProbabilistic {
+					if len(probabilitiesList) == 0 {
+						pointsList := newIfs.RunProbabilistic(newIfs.CalculateProbabilities())
+						fractal := viz.NewFractalImage(width, height, "stack.png", pointsList)
+						stack.ThickenedFractal(fractal, thickness, downloadsPath+"/out.stl")
+					} else {
+						pointsList := newIfs.RunProbabilistic(probabilitiesList)
+						fractal := viz.NewFractalImage(width, height, "stack.png", pointsList)
+						stack.ThickenedFractal(fractal, thickness, downloadsPath+"/out.stl")
+					}
+
+				} else if algorithmDeterministic {
+					pointsList := newIfs.RunDeterministic()
+					fractal := viz.NewFractalImage(width, height, "my_deterministic_fractal.png", pointsList)
+					stack.ThickenedFractal(fractal, thickness, downloadsPath+"/out.stl")
+				}
+			} else {
+				stack.CreateFractalStack(Path, numStacks, thickness, downloadsPath+"/out.stl")
+			}
 			return
 		}
 

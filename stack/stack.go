@@ -9,7 +9,7 @@ import (
 	IFS "github.com/jcocozza/go_fractals/IteratedFunctionSystems"
 	viz "github.com/jcocozza/go_fractals/visualizer"
 )
-
+// combine a set of fractals together
 func CreateFractalStack(ifspath string, numStacks int, thickness float32, outputPath string) {
 	transformList, dim := IFS.ParseIFS(ifspath)
 	newIfs := IFS.NewIteratedFunctionSystem(transformList, 3, 1000, dim)
@@ -41,6 +41,13 @@ func CreateFractalStack(ifspath string, numStacks int, thickness float32, output
 	saveSTL(mesh, outputPath)
 
 }
+
+// return a fractal that is thickened
+func ThickenedFractal(fractal *viz.FractalImage, thickness float32, outputPath string) {
+	mesh := fractal.ExtrudeImage(0, thickness)
+	saveSTL(mesh, outputPath)
+}
+
 
 func crossProduct(v1, v2 []float32) []float32 {
 	return []float32{
