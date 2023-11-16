@@ -2,6 +2,8 @@
 
 This is some code to build fractals using iterated function systems.
 
+![image](./sample_iterated_function_system_files/images/example.png)
+
 ## Usage
 
 ```
@@ -87,6 +89,14 @@ And here it is:
 
 
 ## .stl files:
+
+### Stacks
+
+Stacks are a pain to do properly, and I currently do not have the 3D skills to properly do them.
+Right now what the "stacks" are, are a set of 2-D points (the fractal) and an identical set of points shifted into 3-D space.
+Then we just connect the corresponding points.
+
+This way of doing things is not feasible for 3-D printing because we're not actually creating surfaces, just a whole bunch of parallel lines organized in a way that makes the fractal look 3-D. The printers aren't smart enough to know the thing is a very good approximation of a 3D object.
 
 Here's an example of a .stl produced by the stack maker:
 ![image](./sample_iterated_function_system_files/images/stack/stack.png)
