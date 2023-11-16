@@ -67,6 +67,7 @@ func (ifs *IteratedFunctionSystem) RunDeterministic() [][]float64 {
 	pointsList := ifs.InitialPoints
 
 	for i := 0; i < ifs.NumIterations; i++ {
+		utils.ProgressBar(i,ifs.NumIterations)
 		var tempPointList [][]float64
 		for j := 0; j < len(pointsList); j++ {
 			newPoints := ifs.Transform(pointsList[j])
@@ -148,6 +149,7 @@ func (ifs *IteratedFunctionSystem) RunProbabilistic(probabilities []float64) [][
 	mostRecentPoints := ifs.InitialPoints
 	fmt.Println("probabilities:", probabilities)
 	for i := 0; i < ifs.NumIterations; i++ {
+		utils.ProgressBar(i,ifs.NumIterations)
 		for j := 0; j < len(mostRecentPoints); j++ {
 			var newPoint []float64
 			idx := utils.PickRandom(probabilities) //pick an index based on the probabilities
