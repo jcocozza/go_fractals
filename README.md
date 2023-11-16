@@ -103,4 +103,7 @@ Here's an example of a .stl produced by the stack maker:
 
 
 ## Videos
-![video](./sample_iterated_function_system_files/images/video.mp4)
+
+You can also generate videos of fractals developing:
+
+![gif](./sample_iterated_function_system_files/images/example.gif)
