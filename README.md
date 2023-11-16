@@ -5,21 +5,26 @@ This is some code to build fractals using iterated function systems.
 ## Usage
 
 ```
-% go_fractals ifs --help
-
+go_fractals ifs --help
 Pass in a file that contains an iterated function system
 
 Usage:
   go_fractals ifs [flags]
 
 Flags:
-      --algo-d                       [OPTIONAL] Use the deterministic algorithm
+      --algo-d                       [OPTIONAL] Use the deterministic algorithm (default true)
       --algo-p                       [OPTIONAL] Use the probabilistic algorithm
   -f, --fps int                      [OPTIONAL] The framerate of the video. (default 10)
   -h, --help                         help for ifs
   -n, --numItr int                   [OPTIONAL] The number of iterations you want to use. (default 1)
+  -z, --numPoints int                [OPTIONAL] The number of initial points. (default 1)
+  -k, --numStacks int                [OPTIONAL] The number of stacks to generate (default 1)
+  -t, --numTransforms int            [OPTIONAL] The number of transforms to randomly generate. (default 2)
   -p, --path string                  [REQUIRED] The path to your iterated function system file
       --probabilities float64Slice   [OPTIONAL - comma separated] Specify probabilities of transformations. Must add to 1. If none will calculated based on matrices. Note that a determinant of zero can cause unexpected things. (default [])
+  -r, --random                       [OPTIONAL] Create a random 2D Iterated Function system using the probabilistic algorithm
+  -s, --stack                        [OPTIONAL] Generate the corresponding fractal stack - writes to ~/Downloads/out.stl file
+  -T, --thickness float32            [OPTIONAL] Specify the thickness the stack layer (default 15)
   -v, --video                        [OPTIONAL] Whether to create a video or not
 ```
 
@@ -75,3 +80,17 @@ The probabilistic algorithm:
 The probabilistic algorithm with custom probabilities for each transformation (This will do a better job of adding the stem compared to the probabilistic algorithm alone):
 
 3) `go_fractals ifs -p sample_iterated_function_system_files/barnsley_fern_ifs.txt --algo-p -n 67108864 --probabilities .1,.67,.115,.115`
+
+And here it is:
+
+![image](./sample_iterated_function_system_files/images/barnsley_fern.png)
+
+
+## .stl files:
+
+Here's an example of a .stl produced by the stack maker:
+![image](./sample_iterated_function_system_files/images/stack/stack.png)
+
+
+## Videos
+![video](./sample_iterated_function_system_files/images/video.mp4)

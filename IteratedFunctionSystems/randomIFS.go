@@ -33,5 +33,5 @@ func GenerateRandomIFS(dimension int, numTransformations int) IteratedFunctionSy
 		transformationList = append(transformationList, tempTransform)
 	}
 
-	return *NewIteratedFunctionSystem(transformationList, 1000000, dimension)
+	return *NewIteratedFunctionSystem(transformationList, 1000000, 1, dimension)
 }

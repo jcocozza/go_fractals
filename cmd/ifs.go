@@ -1,16 +1,14 @@
 package cmd
 
 import (
-	"fmt"
-	"strings"
+	"os"
+	"path/filepath"
 
 	IFS "github.com/jcocozza/go_fractals/IteratedFunctionSystems"
-	"github.com/jcocozza/go_fractals/utils"
+	"github.com/jcocozza/go_fractals/stack"
 	viz "github.com/jcocozza/go_fractals/visualizer"
-	"github.com/spf13/cobra"
-	"gonum.org/v1/gonum/mat"
 	BAR "github.com/schollz/progressbar/v3"
-
+	"github.com/spf13/cobra"
 )
 var Path string
 var numIterations int
@@ -21,6 +19,11 @@ var frameRate int
 var probabilitiesList []float64
 var random bool
 var numTransforms int
+var numPoints int
+var fractalStack bool
+var numStacks int
+var thickness float32
+
 
 /* // TODO
 var out string - let user specify where the image/video writes to
@@ -49,6 +52,12 @@ func init() {
 	ifsCmd.MarkFlagsMutuallyExclusive("algo-d", "probabilities")
 	ifsCmd.MarkFlagsMutuallyExclusive("probabilities", "video")
 
+	ifsCmd.Flags().IntVarP(&numPoints, "numPoints", "z", 1, "[OPTIONAL] The number of initial points.")
+
+	ifsCmd.Flags().BoolVarP(&fractalStack, "stack","s", false, "[OPTIONAL] Generate the corresponding fractal stack - writes to ~/Downloads/out.stl file")
+	ifsCmd.Flags().IntVarP(&numStacks, "numStacks", "k", 1, "[OPTIONAL] The number of stacks to generate")
+	ifsCmd.Flags().Float32VarP(&thickness, "thickness","T", 15, "[OPTIONAL] Specify the thickness the stack layer")
+	ifsCmd.MarkFlagsRequiredTogether("stack", "numStacks", "thickness")
 
 	ifsCmd.Flags().BoolVarP(&random, "random","r", false, "[OPTIONAL] Create a random 2D Iterated Function system using the probabilistic algorithm")
 	//ifsCmd.MarkFlagsMutuallyExclusive("random", "video", "probabilities", "fps", "algo-p", "algo-d", "path")
@@ -63,31 +72,8 @@ var ifsCmd = &cobra.Command{
 	Long: "Pass in a file that contains an iterated function system",
 	Args: cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
-		//fmt.Println("Reading from file:", Path)
 
-		rowMatches := utils.Reader(Path, `\[(.*?)\]`)
-
-		var transformationList []IFS.Transformation
-		var dimension int
-		for _, rowMatch := range rowMatches {
-			dimSimilarity := utils.ParseCommaDelimitedStr(strings.Trim(rowMatch[0], "[]"))
-			similarity := utils.ParseCommaDelimitedStr(strings.Trim(rowMatch[1], "[]"))
-
-			dimShift := utils.ParseCommaDelimitedStr(strings.Trim(rowMatch[2], "[]"))
-			shift := utils.ParseCommaDelimitedStr(strings.Trim(rowMatch[3], "[]"))
-
-			dimension = int(dimShift[0])
-
-			similarityMatrix := mat.NewDense(int(dimSimilarity[0]),int(dimSimilarity[1]), similarity)
-			shiftMatrix := mat.NewDense(int(dimShift[0]),int(dimShift[1]), shift)
-			transform, err := IFS.NewTransformation(*similarityMatrix, *shiftMatrix)
-
-			if err != nil {
-				panic(fmt.Sprintf("Unable to create transform: %s", err))
-			}
-
-			transformationList = append(transformationList, *transform)
-		}
+		transformationList, dimension := IFS.ParseIFS(Path)
 
 		if len(probabilitiesList) != 0 && len(probabilitiesList) != len(transformationList) {
 			panic("You must pass as many probabilities as there are transforms")
@@ -112,7 +98,43 @@ var ifsCmd = &cobra.Command{
 			return
 		}
 
-		newIfs := IFS.NewIteratedFunctionSystem(transformationList, numIterations, dimension)
+		newIfs := IFS.NewIteratedFunctionSystem(transformationList, numIterations, numPoints, dimension)
+
+		if fractalStack {
+
+			// Get the user's home directory
+			homeDir, err := os.UserHomeDir()
+			if err != nil {
+				//fmt.Println("Error getting user's home directory:", err)
+				return
+			}
+
+			// Construct the path to the Downloads folder
+			downloadsPath := filepath.Join(homeDir, "Downloads")
+
+			if numStacks == 1 { // in the case of a stack with length 1, we really just want to thicken a fractal after it's algorithm has been run
+				// choice of which algorithm generates the points in the case of the fractal thickening
+				if algorithmProbabilistic {
+					if len(probabilitiesList) == 0 {
+						pointsList := newIfs.RunProbabilistic(newIfs.CalculateProbabilities())
+						fractal := viz.NewFractalImage(width, height, "stack.png", pointsList)
+						stack.ThickenedFractal(fractal, thickness, downloadsPath+"/out.stl")
+					} else {
+						pointsList := newIfs.RunProbabilistic(probabilitiesList)
+						fractal := viz.NewFractalImage(width, height, "stack.png", pointsList)
+						stack.ThickenedFractal(fractal, thickness, downloadsPath+"/out.stl")
+					}
+
+				} else if algorithmDeterministic {
+					pointsList := newIfs.RunDeterministic()
+					fractal := viz.NewFractalImage(width, height, "my_deterministic_fractal.png", pointsList)
+					stack.ThickenedFractal(fractal, thickness, downloadsPath+"/out.stl")
+				}
+			} else {
+				stack.CreateFractalStack(Path, numStacks, thickness, downloadsPath+"/out.stl")
+			}
+			return
+		}
 
 		if dimension == 3 {
 			if algorithmDeterministic {
