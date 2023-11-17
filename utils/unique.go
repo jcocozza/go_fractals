@@ -2,7 +2,6 @@ package utils
 
 import (
 	"fmt"
-	"encoding/json"
 )
 
 // Determine the number of unique subLists in a list of lists
@@ -11,12 +10,12 @@ func CalculateUniqueListElements(lst [][]float64) int{
 
     // Iterate through the list and add serialized subList to the map
     for _, subList := range lst {
-        subListStr, err := json.Marshal(subList)
-        if err != nil {
-            fmt.Println("Error:", err)
-            panic("")
+        subListStr := fmt.Sprintf("%v", subList)
+
+                // Check if it's unique, and if so, add it to the map
+        if _, exists := uniqueElements[subListStr]; !exists {
+            uniqueElements[subListStr] = true
         }
-        uniqueElements[string(subListStr)] = true
     }
 	return len(uniqueElements) // the number of distinct subLists
 }

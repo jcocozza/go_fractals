@@ -3,6 +3,7 @@ package visualizer
 import (
 	"fmt"
 	"os/exec"
+	"os"
 
 	IFS "github.com/jcocozza/go_fractals/IteratedFunctionSystems"
 	"github.com/jcocozza/go_fractals/utils"
@@ -22,22 +23,24 @@ type Algorithm func([][]float64) [][]float64
 func VideoWrapper(width int, height int, fileName string, ifs IFS.IteratedFunctionSystem, stepWiseAlgo Algorithm, frameRate int, progressCh chan int) {
 	fv := newFractalVideo(width, height, fileName, ifs, frameRate)
 
+	dir, _ := os.MkdirTemp("","video")
+	defer os.RemoveAll(dir)
+
 	pointAccumulator := fv.IFSys.InitialPoints
 	newPoints := fv.IFSys.InitialPoints
 	// write the initial conditions
-	fractal := NewFractalImage(fv.Width, fv.Height, "video/image0.png", pointAccumulator)
+	fractal := NewFractalImage(fv.Width, fv.Height, dir+"/image0.png", pointAccumulator)
 	fractal.WriteImage()
 
 	for i := 0; i < fv.IFSys.NumIterations; i ++ {
 		newPoints = stepWiseAlgo(newPoints)
 		pointAccumulator = append(pointAccumulator, newPoints...)
 		//fmt.Println("POINT SET:", pointAccumulator)
-		fractal := NewFractalImage(fv.Width, fv.Height, fmt.Sprintf("video/image%d.png", i), pointAccumulator)
+		fractal := NewFractalImage(fv.Width, fv.Height, fmt.Sprintf(dir+"/image%d.png", i), pointAccumulator)
 		fractal.WriteImage()
 		progressCh <- (i + 1)
 	}
-	//fv.writeVideoImages(stepWiseAlgo)
-	fv.createVideo()
+	fv.createVideo(dir)
 	progressCh <- fv.IFSys.NumIterations + 1
 	close(progressCh)
 }
@@ -52,25 +55,9 @@ func newFractalVideo(width int, height int, path string, ifs IFS.IteratedFunctio
 	}
 }
 
-//WriteVideoImages will run the deterministic algorithm one step at a time and save an image at each step
-func (fv *FractalVideo) writeVideoImages(stepWiseAlgo Algorithm) {
-	pointAccumulator := fv.IFSys.InitialPoints
-	newPoints := fv.IFSys.InitialPoints
-	// write the initial conditions
-	fractal := NewFractalImage(fv.Width, fv.Height, "video/image0.png", pointAccumulator)
-	fractal.WriteImage()
-
-	for i := 0; i < fv.IFSys.NumIterations; i ++ {
-		newPoints = stepWiseAlgo(newPoints)
-		pointAccumulator = append(pointAccumulator, newPoints...)
-		fractal := NewFractalImage(fv.Width, fv.Height, fmt.Sprintf("video/image%d.png", i), pointAccumulator)
-		fractal.WriteImage()
-	}
-}
-
 //CreateVideo combine the images into a video
-func (fv *FractalVideo) createVideo() {
-	inputPattern := "video/image%01d.png"
+func (fv *FractalVideo) createVideo(tmpDir string) {
+	inputPattern := tmpDir+"/image%01d.png"
 	outputVideo := fv.Path
 
     cmd := exec.Command("ffmpeg",
