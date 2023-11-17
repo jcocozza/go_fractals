@@ -72,6 +72,26 @@ var ifsCmd = &cobra.Command{
 	Long: "Pass in a file that contains an iterated function system",
 	Args: cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
+		const width, height = 1000,1000
+		// Get the user's home directory
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			//fmt.Println("Error getting user's home directory:", err)
+			return
+		}
+
+		// Construct the path to the Downloads folder
+		downloadsPath := filepath.Join(homeDir, "Downloads")
+
+
+		if random {
+			randIFS := IFS.GenerateRandomIFS(2, numTransforms)
+			pointsList := randIFS.RunProbabilistic(randIFS.CalculateProbabilities())
+			//fmt.Println("POints list", pointsList[1])
+			fractal := viz.NewFractalImage(width, height, downloadsPath+"/random_fractal.png", pointsList)
+			fractal.WriteImage()
+			return
+		}
 
 		transformationList, dimension := IFS.ParseIFS(Path)
 
@@ -87,47 +107,30 @@ var ifsCmd = &cobra.Command{
 		if len(probabilitiesList) != 0 && probSum != 1 {
 			panic("Passed probabilities must sum to 1")
 		}
-		const width, height = 1000,1000
 
-		if random {
-			randIFS := IFS.GenerateRandomIFS(2, numTransforms)
-			pointsList := randIFS.RunProbabilistic(randIFS.CalculateProbabilities())
-			//fmt.Println("POints list", pointsList[1])
-			fractal := viz.NewFractalImage(width, height, "my_random_fractal.png", pointsList)
-			fractal.WriteImage()
-			return
-		}
 
 		newIfs := IFS.NewIteratedFunctionSystem(transformationList, numIterations, numPoints, dimension)
 
 		if fractalStack {
-
-			// Get the user's home directory
-			homeDir, err := os.UserHomeDir()
-			if err != nil {
-				//fmt.Println("Error getting user's home directory:", err)
-				return
-			}
-
-			// Construct the path to the Downloads folder
-			downloadsPath := filepath.Join(homeDir, "Downloads")
-
 			if numStacks == 1 { // in the case of a stack with length 1, we really just want to thicken a fractal after it's algorithm has been run
 				// choice of which algorithm generates the points in the case of the fractal thickening
 				if algorithmProbabilistic {
 					if len(probabilitiesList) == 0 {
 						pointsList := newIfs.RunProbabilistic(newIfs.CalculateProbabilities())
 						fractal := viz.NewFractalImage(width, height, "stack.png", pointsList)
+						fractal.WriteImage()
 						stack.ThickenedFractal(fractal, thickness, downloadsPath+"/out.stl")
 					} else {
 						pointsList := newIfs.RunProbabilistic(probabilitiesList)
 						fractal := viz.NewFractalImage(width, height, "stack.png", pointsList)
+						fractal.WriteImage()
 						stack.ThickenedFractal(fractal, thickness, downloadsPath+"/out.stl")
 					}
 
 				} else if algorithmDeterministic {
 					pointsList := newIfs.RunDeterministic()
-					fractal := viz.NewFractalImage(width, height, "my_deterministic_fractal.png", pointsList)
+					fractal := viz.NewFractalImage(width, height, downloadsPath+"/deterministic_fractal.png", pointsList)
+					fractal.WriteImage()
 					stack.ThickenedFractal(fractal, thickness, downloadsPath+"/out.stl")
 				}
 			} else {
@@ -162,7 +165,7 @@ var ifsCmd = &cobra.Command{
 				if createVideo {
 					bar := BAR.Default(int64(numIterations + 1), "Generating Fractals...")
 					progressCh := make(chan int)
-					go viz.VideoWrapper(width, height, "my_fractal_video.mp4", *newIfs, newIfs.RunProbabilisticStepWise, frameRate, progressCh)
+					go viz.VideoWrapper(width, height, downloadsPath+"/fractal_video.mp4", *newIfs, newIfs.RunProbabilisticStepWise, frameRate, progressCh)
 
 					// Monitor the progress channel and update the progress bar
 					for progress := range progressCh {
@@ -175,11 +178,11 @@ var ifsCmd = &cobra.Command{
 
 				if len(probabilitiesList) == 0 {
 					pointsList := newIfs.RunProbabilistic(newIfs.CalculateProbabilities())
-					fractal := viz.NewFractalImage(width, height, "my_probabilistic_fractal.png", pointsList)
+					fractal := viz.NewFractalImage(width, height, downloadsPath+"/probabilistic_fractal.png", pointsList)
 					fractal.WriteImage()
 				} else {
 					pointsList := newIfs.RunProbabilistic(probabilitiesList)
-					fractal := viz.NewFractalImage(width, height, "my_probabilistic_fractal.png", pointsList)
+					fractal := viz.NewFractalImage(width, height, downloadsPath+"/probabilistic_fractal.png", pointsList)
 					fractal.WriteImage()
 				}
 
@@ -187,7 +190,7 @@ var ifsCmd = &cobra.Command{
 				if createVideo {
 					bar := BAR.Default(int64(numIterations + 1), "Generating Fractals...")
 					progressCh := make(chan int)
-					go viz.VideoWrapper(width, height, "my_fractal_video.mp4", *newIfs, newIfs.RunDeterministicStepWise, frameRate, progressCh)
+					go viz.VideoWrapper(width, height, downloadsPath+"/fractal_video.mp4", *newIfs, newIfs.RunDeterministicStepWise, frameRate, progressCh)
 					// Monitor the progress channel and update the progress bar
 					for progress := range progressCh {
 						bar.Set(progress)
@@ -197,7 +200,7 @@ var ifsCmd = &cobra.Command{
 					return
 				}
 				pointsList := newIfs.RunDeterministic()
-				fractal := viz.NewFractalImage(width, height, "my_deterministic_fractal.png", pointsList)
+				fractal := viz.NewFractalImage(width, height, downloadsPath+"/deterministic_fractal.png", pointsList)
 				fractal.WriteImage()
 			} else {
 				panic("No other algorithm to use!!")
