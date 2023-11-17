@@ -2,7 +2,7 @@
 
 This is some code to build fractals using iterated function systems.
 
-![image](./sample_iterated_function_system_files/images/example.png)
+![image](./examples/images/example.png)
 
 ## Usage
 
@@ -73,19 +73,19 @@ Here are several ways to generate the barnsley fern which is represented by the 
 ```
 
 The deterministic algorithm:
-1) `go_fractals ifs -p sample_iterated_function_system_files/barnsley_fern_ifs.txt --algo-d -n 13`
+1) `go_fractals ifs -p examples/barnsley_fern_ifs.txt --algo-d -n 13`
 
 The probabilistic algorithm:
 
-2) `go_fractals ifs -p sample_iterated_function_system_files/barnsley_fern_ifs.txt --algo-p -n 67108864`
+2) `go_fractals ifs -p examples/barnsley_fern_ifs.txt --algo-p -n 67108864`
 
 The probabilistic algorithm with custom probabilities for each transformation (This will do a better job of adding the stem compared to the probabilistic algorithm alone):
 
-3) `go_fractals ifs -p sample_iterated_function_system_files/barnsley_fern_ifs.txt --algo-p -n 67108864 --probabilities .1,.67,.115,.115`
+3) `go_fractals ifs -p examples/barnsley_fern_ifs.txt --algo-p -n 67108864 --probabilities .1,.67,.115,.115`
 
 And here it is:
 
-![image](./sample_iterated_function_system_files/images/barnsley_fern.png)
+![image](./examples/images/barnsley_fern.png)
 
 
 ## .stl files:
@@ -99,11 +99,57 @@ Then we just connect the corresponding points.
 This way of doing things is not feasible for 3-D printing because we're not actually creating surfaces, just a whole bunch of parallel lines organized in a way that makes the fractal look 3-D. The printers aren't smart enough to know the thing is a very good approximation of a 3D object.
 
 Here's an example of a .stl produced by the stack maker:
-![image](./sample_iterated_function_system_files/images/stack/stack.png)
+![image](./examples/images/stack/stack.png)
 
 
 ## Videos
 
 You can also generate videos of fractals developing:
 
-![gif](./sample_iterated_function_system_files/images/example.gif)
+![gif](./examples/images/example.gif)
+
+## Random Fractals
+
+This did not work out the way I expected and need refinement. Currently, you rarely get anything interesting.
+Most of the time they aren't fractals in the rigorous sense.
+
+![image](./examples/images/random_fractal.png)
+
+
+## A full suite - The maple fractal:
+```
+[2,2][.15,0,0,.5] + [2,1][-.125,-1]
+[2,2][.4,.4,-.5,.5] + [2,1][1.2,-.75]
+[2,2][.4,-.4,.5,.5] + [2,1][-1.4,-.73]
+[2,2][.5,0,0,.5] + [2,1][.01,1.5]
+```
+
+### Deterministic
+```
+$ go_fractals ifs -p maple.ifs --algo-d -n 11
+Total number of points: 4194304
+Elapsed time for Deterministic algorithm: 1.121766417s
+```
+![image](./examples/maple/maple_deterministic.png)
+
+### Probabilistic
+(using same # of points as deterministic, hence: `-n 4194304`)
+```
+$go_fractals ifs -p leaf.ifs --algo-p -n 4194304
+probabilities: [0.06666666666666667 0.35555555555555557 0.35555555555555557 0.2222222222222222]
+Total number of points: 4194305
+Elapsed time for Probabilistic algorithm: 8.189872041s
+```
+![image](./examples/maple/maple_probabilistic.png)
+
+### Video
+```
+go_fractals ifs -p leaf.ifs --algo-d -v -n 11 --fps 3
+```
+![gif](./examples/maple/maple_video.gif)
+
+### Stack
+```
+go_fractals ifs -p leaf.ifs --stack -k 1 -T 50 -n 1000000 --algo-p
+```
+![image](./examples/maple/maple_stack.png)
