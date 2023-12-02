@@ -129,7 +129,7 @@ func JuliaEvolution(functionClass func(complex128,complex128) complex128, cInit,
 }
 
 // 2d evolution through parameter space
-func EvolveVideo(functionClass func(complex128,complex128) complex128, cInit, cIncrement complex128, numIncrements int, fps int) {
+func EvolveVideo(functionClass func(complex128,complex128) complex128, cInit, cIncrement complex128, numIncrements int, fps int, outputPath string) {
 	dir, _ := os.MkdirTemp("","video")
 	defer os.RemoveAll(dir)
 
@@ -163,7 +163,7 @@ func EvolveVideo(functionClass func(complex128,complex128) complex128, cInit, cI
 	wg.Wait() // Wait for all goroutines to finish
 
 	inputPattern := dir+"/image%01d.png"
-	outputVideo := "TEST.mp4"
+	outputVideo := outputPath
 
     cmd := exec.Command("ffmpeg",
         "-framerate", fmt.Sprint(fps),            // Frame rate

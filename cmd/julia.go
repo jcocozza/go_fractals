@@ -71,6 +71,13 @@ var juliaEvolveCommand = &cobra.Command{
 	Long: "Create a video or 3d stl of the julia set evolving through parameter space",
 	Args: cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			fmt.Println("Error getting user's home directory:", err)
+			return
+		}
+		// Construct the path to the Downloads folder
+		downloadsPath := filepath.Join(homeDir, "Downloads")
 
 		juliaSetlist := et.JuliaEvolution(
 			utils.ParseEquation2(juliaEquation),
@@ -79,7 +86,7 @@ var juliaEvolveCommand = &cobra.Command{
 			numIncrements,
 		)
 		if threeDimensional {
-			stlFileName := "out.stl"
+			stlFileName := fileName+".stl"
 			stlFile, err := os.Create(stlFileName)
 			if err != nil {
 				fmt.Println("Error creating STL file:", err)
@@ -104,6 +111,7 @@ var juliaEvolveCommand = &cobra.Command{
 				utils.ParseComplexString(cIncrementString),
 				numIncrements,
 				fps,
+				downloadsPath + "/" + fileName + ".mp4",
 			)
 		}
 	},
@@ -117,7 +125,7 @@ func init() {
 	// regualar julia set
 	juliaCommand.Flags().StringVarP(&juliaEquation, "equation", "e", "", "[REQUIRED] The equation for your julia set")
 	juliaCommand.Flags().BoolVarP(&colored, "color","c", false, "[OPTIONAL] Default Grey Scale")
-	juliaCommand.Flags().StringVarP(&fileName, "fileName", "n", "", "[REQUIRED] The file name in the downloads folder")
+	juliaCommand.Flags().StringVarP(&fileName, "fileName", "F", "", "[REQUIRED] The file name in the downloads folder")
 	juliaCommand.MarkFlagRequired("equation")
 	juliaCommand.MarkFlagRequired("fileName")
 
@@ -126,6 +134,8 @@ func init() {
 	juliaEvolveCommand.Flags().StringVarP(&cInitString, "initialComplex","p","", "[REQUIRED] Set the intial parameter for a julia evolution")
 	juliaEvolveCommand.Flags().StringVarP(&cIncrementString, "complexIncrement","i","", "[REQUIRED] Set the increment for the evolution of the parameter")
 	juliaEvolveCommand.Flags().IntVarP(&numIncrements, "numIncrements", "n",10,"[REQUIRED] the number of evolution steps to take")
+	juliaEvolveCommand.Flags().StringVarP(&fileName, "fileName", "F", "", "[REQUIRED] The file name in the downloads folder")
+
 	juliaEvolveCommand.MarkFlagsRequiredTogether("equation", "initialComplex", "complexIncrement", "numIncrements")
 
 	juliaEvolveCommand.Flags().BoolVarP(&threeDimensional, "threeDim","d", false, "[OPTIONAL] Create a 3d stl file of the evolution")

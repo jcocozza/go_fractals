@@ -1,8 +1,10 @@
 # Fractal Generator
 
-This is some code to build fractals using iterated function systems.
+This is some code to build fractals.
 
 ![image](./examples/images/example.png)
+
+# Iterated Function Systems
 
 ## Usage
 
@@ -153,3 +155,69 @@ go_fractals ifs -p leaf.ifs --algo-d -v -n 11 --fps 3
 go_fractals ifs -p leaf.ifs --stack -k 1 -T 50 -n 1000000 --algo-p
 ```
 ![image](./examples/maple/maple_stack.png)
+
+# Julia Sets
+
+Using the escape time algorithm `go_fractals` also provides the ability to build Julia sets.
+
+## Usage
+
+There are two julia commands, a regular julia set and julia parameter evolution.
+
+```
+$ go run . julia --help
+Pass in a complex function for the julia set
+
+Usage:
+  go_fractals julia [flags]
+
+Flags:
+  -c, --color             [OPTIONAL] Default Grey Scale
+  -e, --equation string   [REQUIRED] The equation for your julia set
+  -F, --fileName string   [REQUIRED] The file name in the downloads folder
+  -h, --help              help for julia
+```
+
+```
+$ go run . julia-evolve --help
+Create a video or 3d stl of the julia set evolving through parameter space
+
+Usage:
+  go_fractals julia-evolve [flags]
+
+Flags:
+  -i, --complexIncrement string   [REQUIRED] Set the increment for the evolution of the parameter
+  -e, --equation string           [REQUIRED] The parameterized equation for your julia set
+  -F, --fileName string           [REQUIRED] The file name in the downloads folder
+  -f, --fps int                   [OPTIONAL] The framerate of the video. (default 10)
+  -h, --help                      help for julia-evolve
+  -p, --initialComplex string     [REQUIRED] Set the intial parameter for a julia evolution
+  -n, --numIncrements int         [REQUIRED] the number of evolution steps to take (default 10)
+  -d, --threeDim                  [OPTIONAL] Create a 3d stl file of the evolution
+```
+
+### Equations
+The basis for julia sets are the equations you use to build them. I don't have a particularly sophisticated equation parser, but essentially what happens is that your equation will be converted into a golang function. When passing them into the CLI, you need to use golang syntax: `z*z - 2` is the equation `z^2 - 2`.
+
+(Although I haven't tested, theoretically, any function of a complex variable will be viable if it is in golang code. So
+`cmplx.Cos(z) + 2i` could theoretically work.)
+
+When creating a regular julia set, you must use `z` as the function's variable. (this is a consequence of how the parser is built)
+
+When creating julia evolutions, `z` is the function variable and `c` is the parameter that will be evolved. For example, `z*z - c`.
+
+### Regular Julia Set
+
+`$ go_fractals julia -e "1/(z*z + .72i)" -F example`
+
+![image](./examples/julia/example.png)
+
+### Julia Evolution
+
+An evolution associated with the above's fractal set:
+`$ go_fractals julia-evolve -e "1/(z*z + c)" -f 10 -p "0-0.63i" -n 100 -i "0-0.001i" -F example`
+
+What this represents is the evolution through parameter space from:
+`1/(z*z + -0.63i)` ⇒ `1/(z*z + -.73i)` in increments of `0.001`.
+
+![gif](./examples/julia/evolution.gif)
