@@ -59,7 +59,7 @@ func (s *MandelbrotSet) Draw() {
 func TestMandelbrot() {
 	mb := MandelbrotSet{
 		Transformation: func(z, c complex128) complex128 {
-			return z*z + c
+			return z*z + c //return 1/(z*z + c)
 		},
 		InitPoint: complex(0,0),
 		EscapeCondition: func(c complex128) bool {

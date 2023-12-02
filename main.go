@@ -14,5 +14,7 @@ func main() {
 	//EscapeTime.TestJuliaEvolve()
 	//utils.TEST()
 	//EscapeTime.TestJulia2()
+	//EscapeTime.TestMandelbrot()
+	//EscapeTime.Julia3d()
 }
 
