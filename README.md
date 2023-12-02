@@ -9,7 +9,7 @@ This is some code to build fractals.
 ## Usage
 
 ```
-go_fractals ifs --help
+$ go_fractals ifs --help
 Pass in a file that contains an iterated function system
 
 Usage:
@@ -53,7 +53,7 @@ Each newline represents a new transformation in the system. Information about th
 
 So, if we look at `[2,2][.5,0,0,.5], we see this is a 2x2 matrix.` When ordering elements of the matrix, start in the first row, and go across columns, then go tho the second row and so on.
 
-So the the identity matrix:
+So the identity matrix is:
 ```
 [ 1 0 ]
 [ 0 1 ]
@@ -65,7 +65,7 @@ Note that shifts should always have a `number_of_columns = 1`, since you are sim
 
 ## Example
 
-Here are several ways to generate the barnsley fern which is represented by the following IFS:
+Here are several ways to generate the Barnsley fern which is represented by the following IFS:
 
 ```
 [2,2][0,0,0,.16] + [2,1][0,0]
@@ -75,15 +75,15 @@ Here are several ways to generate the barnsley fern which is represented by the 
 ```
 
 The deterministic algorithm:
-1) `go_fractals ifs -p examples/barnsley_fern_ifs.txt --algo-d -n 13`
+1) `$ go_fractals ifs -p examples/barnsley_fern_ifs.txt --algo-d -n 13`
 
 The probabilistic algorithm:
 
-2) `go_fractals ifs -p examples/barnsley_fern_ifs.txt --algo-p -n 67108864`
+2) `$ go_fractals ifs -p examples/barnsley_fern_ifs.txt --algo-p -n 67108864`
 
 The probabilistic algorithm with custom probabilities for each transformation (This will do a better job of adding the stem compared to the probabilistic algorithm alone):
 
-3) `go_fractals ifs -p examples/barnsley_fern_ifs.txt --algo-p -n 67108864 --probabilities .1,.67,.115,.115`
+3) `$ go_fractals ifs -p examples/barnsley_fern_ifs.txt --algo-p -n 67108864 --probabilities .1,.67,.115,.115`
 
 And here it is:
 
@@ -137,7 +137,7 @@ Elapsed time for Deterministic algorithm: 1.121766417s
 ### Probabilistic
 (using same # of points as deterministic, hence: `-n 4194304`)
 ```
-$go_fractals ifs -p leaf.ifs --algo-p -n 4194304
+$ go_fractals ifs -p leaf.ifs --algo-p -n 4194304
 probabilities: [0.06666666666666667 0.35555555555555557 0.35555555555555557 0.2222222222222222]
 Total number of points: 4194305
 Elapsed time for Probabilistic algorithm: 8.189872041s
@@ -146,13 +146,13 @@ Elapsed time for Probabilistic algorithm: 8.189872041s
 
 ### Video
 ```
-go_fractals ifs -p leaf.ifs --algo-d -v -n 11 --fps 3
+$ go_fractals ifs -p leaf.ifs --algo-d -v -n 11 --fps 3
 ```
 ![gif](./examples/maple/maple_video.gif)
 
 ### Stack
 ```
-go_fractals ifs -p leaf.ifs --stack -k 1 -T 50 -n 1000000 --algo-p
+$ go_fractals ifs -p leaf.ifs --stack -k 1 -T 50 -n 1000000 --algo-p
 ```
 ![image](./examples/maple/maple_stack.png)
 
@@ -165,7 +165,7 @@ Using the escape time algorithm `go_fractals` also provides the ability to build
 There are two julia commands, a regular julia set and julia parameter evolution.
 
 ```
-$ go run . julia --help
+$ go_fractals julia --help
 Pass in a complex function for the julia set
 
 Usage:
@@ -218,6 +218,6 @@ An evolution associated with the above's fractal set:
 `$ go_fractals julia-evolve -e "1/(z*z + c)" -f 10 -p "0-0.63i" -n 100 -i "0-0.001i" -F example`
 
 What this represents is the evolution through parameter space from:
-`1/(z*z + -0.63i)` ⇒ `1/(z*z + -.73i)` in increments of `0.001`.
+`1/(z*z + -0.63i)` ⇒ `1/(z*z + -.73i)` in increments of `0.001i`.
 
 ![gif](./examples/julia/evolution.gif)
