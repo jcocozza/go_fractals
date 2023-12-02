@@ -5,6 +5,7 @@ import (
 	"strconv"
 )
 
+// parse the "a+bi" string into complex(a,b)
 func ParseComplexString(input string) complex128 {
 	// Define a regular expression to extract real and imaginary parts
 	complexPattern := regexp.MustCompile(`^([-+]?\d*\.?\d+)([-+]\d*\.?\d*)i$`)

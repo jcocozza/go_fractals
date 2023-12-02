@@ -7,12 +7,19 @@ import (
 	"plugin"
 )
 
+
+/*
+This allow a user to attach arbritary functions via a string
+*/
+
 /*
 var juliaEquation = `var ParsedTransformation = func(c complex128) complex128 {return %s}`
 var juliaEvolutionEquation = `var ParsedTransformation = func(z complex128, shiftParam complex128) complex128 {return %s}`
 var mandelbrotEquation = `var ParsedTransformation = func(z, c complex128) complex128 {return %s}`
 */
 
+
+// Parse equations with 2 parameters
 func ParseEquation2(eqnInput string) func(complex128, complex128) complex128 {
 	funcString := fmt.Sprintf(`
 package main
@@ -62,6 +69,7 @@ var ParsedTransformation = func (z,c complex128) complex128 {
 	return *parsedTransformationFunc
 }
 
+// parse equations with 1 parameter
 func ParseEquation(eqnInput string) func(complex128) complex128 {
 	//eqnInput := "1/(c*c + .72i)" // Replace this with your equation
 
@@ -69,7 +77,7 @@ func ParseEquation(eqnInput string) func(complex128) complex128 {
 	funcString := fmt.Sprintf(`
 package main
 
-var ParsedTransformation = func(c complex128) complex128 {
+var ParsedTransformation = func(z complex128) complex128 {
 	return %s
 }`, eqnInput)
 

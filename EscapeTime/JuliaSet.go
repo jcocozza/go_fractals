@@ -33,6 +33,7 @@ func NewJuliaSet(transform juliaTransformation, escape escapeCondition, colorGen
 	}
 }
 
+// calculate the escape time of a given complex number
 func (s *JuliaSet) CalcEscapeTime(z complex128) int {
 	orbitItrValue := z
 	for i := 0; i < s.MaxItr; i++ {
@@ -44,6 +45,7 @@ func (s *JuliaSet) CalcEscapeTime(z complex128) int {
 	return s.MaxItr
 }
 
+// draw the julia set
 func (s *JuliaSet) Draw(path string) *image.RGBA {
 	img := image.NewRGBA(image.Rect(0,0,width,height))
 
@@ -69,6 +71,7 @@ func (s *JuliaSet) Draw(path string) *image.RGBA {
 	return img
 }
 
+// only draw points whose escape time is the max Iteration value
 func (s *JuliaSet) DrawFiltered(path string) *image.RGBA {
 	img := image.NewRGBA(image.Rect(0,0,width,height))
 
@@ -111,9 +114,6 @@ func JuliaEvolution(functionClass func(complex128,complex128) complex128, cInit,
 
 	var juliaSetList []*JuliaSet
 	for i := 0; i < numIncremenets; i++ {
-		//currTransformation := func(z complex128) complex128 {
-		//	return functionClass(z, varyingC)
-		//}
 		currTransformation := newTransform(functionClass, varyingC)
 
 		escapeCondition := func(z complex128) bool {
@@ -128,6 +128,7 @@ func JuliaEvolution(functionClass func(complex128,complex128) complex128, cInit,
 	return juliaSetList
 }
 
+// 2d evolution through parameter space
 func EvolveVideo(functionClass func(complex128,complex128) complex128, cInit, cIncrement complex128, numIncrements int, fps int) {
 	dir, _ := os.MkdirTemp("","video")
 	defer os.RemoveAll(dir)
@@ -180,42 +181,3 @@ func EvolveVideo(functionClass func(complex128,complex128) complex128, cInit, cI
 	}
 	utils.DeleteFiles("video", "imag*.png") // clean up images afterwards
 }
-
-
-func TestJulia() {
-	js := JuliaSet{
-		Transformation: func(c complex128) complex128 {
-			return c*c - .2 // 1/(c*c - .72i)//
-		},
-		EscapeCondition: func(c complex128) bool {
-			return cmplx.Abs(c) > 2
-		},
-		ColorGenerator: UnitaryScale,
-		MaxItr: 100,
-		Zoom: 4,
-	}
-	js.Draw("juliaCLEAR.png")
-}
-
-
-func TestJulia2() {
-	js := JuliaSet{
-		Transformation: utils.ParseEquation("1/(c*c - .72i)"),
-		EscapeCondition: func(c complex128) bool {
-			return cmplx.Abs(c) > 2
-		},
-		ColorGenerator: GreyScale,
-		MaxItr: 100,
-		Zoom: 4,
-	}
-	js.Draw("funcTest.png")
-}
-
-func TestJuliaEvolve() {
-
-	transformation := func(z,c complex128) complex128 {
-		return 1/(z*z + c)
-	}
-	EvolveVideo(transformation,complex(0,-.63),complex(0, -.001), 100, 10)
-}
-
