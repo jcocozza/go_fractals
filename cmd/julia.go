@@ -2,9 +2,11 @@ package cmd
 
 import (
 	"fmt"
+	"image"
 	"math/cmplx"
 	"os"
 	"path/filepath"
+	"sync"
 
 	et "github.com/jcocozza/go_fractals/EscapeTime"
 	"github.com/jcocozza/go_fractals/utils"
@@ -86,7 +88,7 @@ var juliaEvolveCommand = &cobra.Command{
 			numIncrements,
 		)
 		if threeDimensional {
-			stlFileName := fileName+".stl"
+			stlFileName := downloadsPath + "/" + fileName+".stl"
 			stlFile, err := os.Create(stlFileName)
 			if err != nil {
 				fmt.Println("Error creating STL file:", err)
@@ -94,15 +96,54 @@ var juliaEvolveCommand = &cobra.Command{
 			}
 			defer stlFile.Close()
 
-			shift := 0.0
 			stlFile.WriteString("solid GeneratedModel\n")
-			for i,js := range juliaSetlist {
-				fmt.Println(js)
-				fName := fmt.Sprintf("tmp-%d.png",i)
-				et.DrawJuliaSet3D(js.DrawFiltered(fName), stlFile, shift)
-				shift += 10
-				utils.ProgressBar(i, len(juliaSetlist))
+			imageChan := make(chan struct {
+				Index int // to ensure proper indexing of channel
+				Image *image.RGBA
+			}, len(juliaSetlist))
+
+			var wg sync.WaitGroup
+
+			for i, js := range juliaSetlist {
+				wg.Add(1) // Increment the wait group counter
+
+				go func(i int, js *et.JuliaSet) {
+					defer wg.Done() // Decrement the wait group counter when the goroutine completes
+
+					fName := fmt.Sprintf("tmp-%d.png", i)
+					img := js.DrawFiltered(fName) // create the images in parallel
+
+					// Send the *image.RGBA instance to the channel
+					imageChan <- struct {
+						Index int
+						Image *image.RGBA
+					}{Index: i, Image: img}
+				}(i, js)
 			}
+			// Close the channel once all goroutines are done
+			go func() {
+				wg.Wait()
+				close(imageChan)
+			}()
+
+			// Create a slice to store the images in the correct order
+			images := make([]struct {
+				Index int
+				Image *image.RGBA
+			}, len(juliaSetlist))
+
+			// Receive images from the channel and store them in the slice
+			for i := range imageChan {
+				images[i.Index] = i
+			}
+
+			shift := 0.0
+			for i, imgStruct := range images { //add to the stl file(seqentially)
+				utils.ProgressBar(i, len(images))
+				et.DrawJuliaSet3D(imgStruct.Image, stlFile, shift)
+				shift += 10
+			}
+
 			stlFile.WriteString("endsolid GeneratedModel\n")
 		} else {
 			et.EvolveVideo(

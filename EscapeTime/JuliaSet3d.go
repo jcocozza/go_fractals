@@ -9,7 +9,7 @@ import (
 const (
 	cuboidWidth  = 1.0
 	cuboidHeight = 1.0
-	cuboidDepth  = 10.0
+	cuboidDepth  = 10.1
 	stlFileName  = "output.stl"
 )
 

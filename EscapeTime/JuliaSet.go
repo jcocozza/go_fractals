@@ -87,6 +87,7 @@ func (s *JuliaSet) DrawFiltered(path string) *image.RGBA {
 		}
 	}
 
+	/*
 	file, err := os.Create(path)
 	if err != nil {
 		panic(err)
@@ -96,6 +97,7 @@ func (s *JuliaSet) DrawFiltered(path string) *image.RGBA {
 	if err != nil {
 		panic(err)
 	}
+	*/
 	return img
 }
 

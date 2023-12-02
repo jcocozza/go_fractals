@@ -5,8 +5,8 @@ import (
 )
 
 const (
-	width = 1000
-	height = 1000
+	width = 200
+	height = 200
 	maxIterations = 1000
 )
 
