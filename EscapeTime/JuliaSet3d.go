@@ -10,7 +10,6 @@ const (
 	cuboidWidth  = 1.0
 	cuboidHeight = 1.0
 	cuboidDepth  = 10.1
-	stlFileName  = "output.stl"
 )
 
 func DrawJuliaSet3D(img image.Image, stlFile *os.File, shift float64) {
