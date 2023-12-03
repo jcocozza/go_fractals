@@ -172,10 +172,17 @@ Usage:
   go_fractals julia [flags]
 
 Flags:
-  -c, --color             [OPTIONAL] Default Grey Scale
-  -e, --equation string   [REQUIRED] The equation for your julia set
-  -F, --fileName string   [REQUIRED] The file name in the downloads folder
-  -h, --help              help for julia
+  -p, --centerPoint string   [Optional] Set the center point for the fractal (default "0+0i")
+  -c, --color                [OPTIONAL] Default Grey Scale
+  -e, --equation string      [REQUIRED] The equation for your julia set
+  -F, --fileName string      [REQUIRED] The file name in the downloads folder
+  -h, --help                 help for julia
+  -m, --maxItr int           [OPTIONAL] Set max iterations for time escape (default 1000)
+  -z, --zoom float           [Optional] Set the zoom; smaller value is more zoomed in (default 4)
+
+Global Flags:
+  -H, --height int   [OPTIONAL] Set height (default 1000)
+  -W, --width int    [OPTIONAL] Set width (default 1000)
 ```
 
 ```
@@ -186,21 +193,25 @@ Usage:
   go_fractals julia-evolve [flags]
 
 Flags:
+  -p, --centerPoint string        [Optional] Set the center point for the fractal (default "0+0i")
   -i, --complexIncrement string   [REQUIRED] Set the increment for the evolution of the parameter
   -e, --equation string           [REQUIRED] The parameterized equation for your julia set
   -F, --fileName string           [REQUIRED] The file name in the downloads folder
   -f, --fps int                   [OPTIONAL] The framerate of the video. (default 10)
   -h, --help                      help for julia-evolve
-  -p, --initialComplex string     [REQUIRED] Set the intial parameter for a julia evolution
+  -P, --initialComplex string     [REQUIRED] Set the intial parameter for a julia evolution
+  -m, --maxItr int                [OPTIONAL] Set max iterations for time escape (default 1000)
   -n, --numIncrements int         [REQUIRED] the number of evolution steps to take (default 10)
   -d, --threeDim                  [OPTIONAL] Create a 3d stl file of the evolution
+  -z, --zoom float                [Optional] Set the zoom; smaller value is more zoomed in (default 4)
+
+Global Flags:
+  -H, --height int   [OPTIONAL] Set height (default 1000)
+  -W, --width int    [OPTIONAL] Set width (default 1000)
 ```
 
 ### Equations
 The basis for julia sets are the equations you use to build them. I don't have a particularly sophisticated equation parser, but essentially what happens is that your equation will be converted into a golang function. When passing them into the CLI, you need to use golang syntax: `z*z - 2` is the equation `z^2 - 2`.
-
-(Although I haven't tested, theoretically, any function of a complex variable will be viable if it is in golang code. So
-`cmplx.Cos(z) + 2i` could theoretically work.)
 
 When creating a regular julia set, you must use `z` as the function's variable. (this is a consequence of how the parser is built)
 
@@ -215,9 +226,54 @@ When creating julia evolutions, `z` is the function variable and `c` is the para
 ### Julia Evolution
 
 An evolution associated with the above's fractal set:
-`$ go_fractals julia-evolve -e "1/(z*z + c)" -f 10 -p "0-0.63i" -n 100 -i "0-0.001i" -F example`
+`$ go_fractals julia-evolve -e "1/(z*z + c)" -f 10 -P "0-0.63i" -n 100 -i "0-0.001i" -F example`
 
 What this represents is the evolution through parameter space from:
 `1/(z*z + -0.63i)` ⇒ `1/(z*z + -.73i)` in increments of `0.001i`.
 
 ![gif](./examples/julia/evolution.gif)
+
+# Mandelbrot Sets
+
+Using the escape time algorithm, `go_fractals` provides the ability to build general Mandelbrot sets.
+
+## Usage
+```
+$ go_fractals mandelbrot --help
+Pass in a complex function for the mandelbrot set
+
+Usage:
+  go_fractals mandelbrot [flags]
+
+Flags:
+  -p, --centerPoint string   [Optional] Set the center point for the fractal (default "0+0i")
+  -c, --color                [OPTIONAL] Default Grey Scale
+  -e, --equation string      [REQUIRED] The equation for your mandelbrot set
+  -F, --fileName string      [REQUIRED] The file name in the downloads folder
+  -h, --help                 help for mandelbrot
+  -m, --maxItr int           [OPTIONAL] Set max iterations for time escape (default 1000)
+  -z, --zoom float           [OPTIONAL] Set the zoom; smaller value is more zoomed in (default 4)
+
+Global Flags:
+  -H, --height int   [OPTIONAL] Set height (default 1000)
+  -W, --width int    [OPTIONAL] Set width (default 1000)
+```
+
+Equations are built in the same way as Julia set equations.
+
+### Example
+
+The classic Mandelbrot set:
+`go_fractals mandelbrot -e "z*z + c" -F mandelbrot`
+
+![image](./examples/mandelbrot/mandelbrot.png)
+
+The burning ship:
+`go_fractals mandelbrot -e "complex(math.Abs(real(z)),math.Abs(imag(z)))*complex(math.Abs(real(z)),math.Abs(imag(z))) + c" -F burningShip`
+
+![image](./examples/mandelbrot/burningShip.png)
+
+The burning ship, zoomed with color, centered at -1.75 + .025i:
+`go_fractals mandelbrot -e "complex(math.Abs(real(z)),math.Abs(imag(z)))*complex(math.Abs(real(z)),math.Abs(imag(z))) + c" -F burningZoomColor -p "-1.75-0.025i" --color -z .08`
+
+![image](./examples/mandelbrot/burningZoomColor.png)
