@@ -89,6 +89,7 @@ func getSym(funcString string) plugin.Symbol {
 	return sym
 }
 
+// handle 1 parameter functions
 func CreateOneParamEquation(eqnInput string) OneParamEquation {
 	var sym plugin.Symbol
     newEqnString := template
@@ -113,6 +114,7 @@ func CreateOneParamEquation(eqnInput string) OneParamEquation {
 	return *parsedTransformationFunc
 }
 
+// handle 2 parameter function
 func CreateTwoParamEquation(eqnInput string) TwoParamEquation {
 	var sym plugin.Symbol
     newEqnString := template

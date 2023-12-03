@@ -13,6 +13,12 @@ var rootCmd = &cobra.Command{
 	Long: "A Command Line Application to build fractals in Go.",
 }
 
+func init() {
+	// TODO NOT IMPLEMENTED YET
+	rootCmd.PersistentFlags().IntVarP(&width, "width", "w", 1000, "[OPTIONAL] Set width")
+	rootCmd.PersistentFlags().IntVarP(&height, "height", "h", 1000, "[OPTIONAL] Set height")
+}
+
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 	  fmt.Fprintln(os.Stderr, err)

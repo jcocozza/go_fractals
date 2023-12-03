@@ -5,9 +5,8 @@ import (
 )
 
 const (
-	width = 1000
-	height = 1000
-	maxIterations = 1000
+	width = 2000
+	height = 2000
 )
 
 // return true if the input has escaped
@@ -54,5 +53,21 @@ func BurningColor(itr int) color.RGBA {
 		G: uint8((itr * 7) % 256),
 		B: 0,
 		A: uint8((itr * 15) % 256),
+	}
+}
+
+func InfernoColor(itr int) color.RGBA {
+	const scale float64 = 0.2 // Adjust this scale for a different appearance
+
+	// Map the iteration value to the Inferno color map
+	r := uint8(255 * scale)
+	g := uint8(((float64(itr) * 5) / 256) * 256 * scale)
+	b := uint8(((float64(itr) * 10) / 256) * 256 * scale)
+
+	return color.RGBA{
+		R: r,
+		G: g,
+		B: b,
+		A: 255,
 	}
 }

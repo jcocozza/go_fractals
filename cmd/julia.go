@@ -37,7 +37,8 @@ var juliaCommand = &cobra.Command{
 				EscapeCondition: func(z complex128) bool {
 					return cmplx.Abs(z) > 2
 				},
-				ColorGenerator: et.GenerateColor,
+				ColorGenerator: et.InfernoColor,
+				Center: utils.ParseComplexString(centerPointString),
 				MaxItr: maxItr,
 				Zoom: zoom,
 			}
@@ -48,6 +49,7 @@ var juliaCommand = &cobra.Command{
 					return cmplx.Abs(z) > 2
 				},
 				ColorGenerator: et.GreyScale,
+				Center: utils.ParseComplexString(centerPointString),
 				MaxItr: maxItr,
 				Zoom: zoom,
 			}
@@ -76,6 +78,7 @@ var juliaEvolveCommand = &cobra.Command{
 			utils.ParseComplexString(cInitString),
 			utils.ParseComplexString(cIncrementString),
 			numIncrements,
+			utils.ParseComplexString(centerPointString),
 			maxItr,
 			zoom,
 		)
@@ -145,6 +148,7 @@ var juliaEvolveCommand = &cobra.Command{
 				numIncrements,
 				fps,
 				downloadsPath + "/" + fileName + ".mp4",
+				utils.ParseComplexString(centerPointString),
 				maxItr,
 				zoom,
 			)
@@ -166,12 +170,14 @@ func init() {
 
 	juliaCommand.Flags().IntVarP(&maxItr, "maxItr","m",1000,"[OPTIONAL] Set max iterations for time escape")
 
+	juliaCommand.Flags().StringVarP(&centerPointString, "centerPoint","p","0+0i", "[Optional] Set the center point for the fractal")
+
 	juliaCommand.MarkFlagRequired("equation")
 	juliaCommand.MarkFlagRequired("fileName")
 
 	// julia evolution flags
 	juliaEvolveCommand.Flags().StringVarP(&juliaEquation, "equation", "e", "", "[REQUIRED] The parameterized equation for your julia set")
-	juliaEvolveCommand.Flags().StringVarP(&cInitString, "initialComplex","p","", "[REQUIRED] Set the intial parameter for a julia evolution")
+	juliaEvolveCommand.Flags().StringVarP(&cInitString, "initialComplex","P","", "[REQUIRED] Set the intial parameter for a julia evolution")
 	juliaEvolveCommand.Flags().StringVarP(&cIncrementString, "complexIncrement","i","", "[REQUIRED] Set the increment for the evolution of the parameter")
 	juliaEvolveCommand.Flags().IntVarP(&numIncrements, "numIncrements", "n",10,"[REQUIRED] the number of evolution steps to take")
 	juliaEvolveCommand.Flags().StringVarP(&fileName, "fileName", "F", "", "[REQUIRED] The file name in the downloads folder")
@@ -183,4 +189,5 @@ func init() {
 	juliaEvolveCommand.Flags().Float64VarP(&zoom, "zoom","z",4,"[Optional] Set the zoom; smaller value is more zoomed in")
 
 	juliaEvolveCommand.Flags().IntVarP(&maxItr, "maxItr","m",1000,"[OPTIONAL] Set max iterations for time escape")
+	juliaEvolveCommand.Flags().StringVarP(&centerPointString, "centerPoint","p","0+0i", "[Optional] Set the center point for the fractal")
 }

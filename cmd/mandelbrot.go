@@ -36,7 +36,7 @@ var mandelbrotCommand = &cobra.Command{
 				},
 				InitPoint: complex(0,0),
 				Center: utils.ParseComplexString(centerPointString),
-				ColorGenerator: et.GenerateColor,
+				ColorGenerator: et.InfernoColor,
 				MaxItr: maxItr,
 				Zoom: zoom,
 			}
@@ -60,7 +60,7 @@ var mandelbrotCommand = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(mandelbrotCommand)
 
-	mandelbrotCommand.Flags().StringVarP(&mandelbrotEquation, "equation", "e", "", "[REQUIRED] The equation for your julia set")
+	mandelbrotCommand.Flags().StringVarP(&mandelbrotEquation, "equation", "e", "", "[REQUIRED] The equation for your mandelbrot set")
 	mandelbrotCommand.Flags().BoolVarP(&colored, "color","c", false, "[OPTIONAL] Default Grey Scale")
 	mandelbrotCommand.Flags().StringVarP(&fileName, "fileName", "F", "", "[REQUIRED] The file name in the downloads folder")
 

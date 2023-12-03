@@ -41,7 +41,7 @@ func (s *MandelbrotSet) Draw(path string) {
                 float64(y-height/2)/height*s.Zoom+imag(s.Center),
             )
 			escapeTime := s.CalcEscapeTime(z)
-			col := s.ColorGenerator(escapeTime) //GenerateColor(escapeTime)
+			col := s.ColorGenerator(escapeTime)
 			img.Set(x,y,col)
 		}
 	}

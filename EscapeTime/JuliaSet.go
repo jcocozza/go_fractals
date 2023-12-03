@@ -16,15 +16,17 @@ type JuliaSet struct {
 	Transformation utils.OneParamEquation
 	EscapeCondition escapeCondition
 	ColorGenerator colorGenerator
+	Center complex128
 	MaxItr int
 	Zoom float64
 }
 
-func NewJuliaSet(transform utils.OneParamEquation, escape escapeCondition, colorGen colorGenerator, maxItr int, zoom float64) *JuliaSet {
+func NewJuliaSet(transform utils.OneParamEquation, escape escapeCondition, colorGen colorGenerator, center complex128, maxItr int, zoom float64) *JuliaSet {
 	return &JuliaSet{
 		Transformation: transform,
 		EscapeCondition: escape,
 		ColorGenerator: colorGen,
+		Center: center,
 		MaxItr: maxItr,
 		Zoom: zoom,
 	}
@@ -106,7 +108,7 @@ func newTransform(funcClass utils.TwoParamEquation, varC complex128) utils.OnePa
 }
 
 // return a list of Julia Sets
-func JuliaEvolution(functionClass utils.TwoParamEquation, cInit, cIncrement complex128, numIncremenets int, maxItr int, zoom float64) []*JuliaSet {
+func JuliaEvolution(functionClass utils.TwoParamEquation, cInit, cIncrement complex128, numIncremenets int, center complex128,maxItr int, zoom float64) []*JuliaSet {
 	varyingC := cInit
 
 	var juliaSetList []*JuliaSet
@@ -116,7 +118,7 @@ func JuliaEvolution(functionClass utils.TwoParamEquation, cInit, cIncrement comp
 		escapeCondition := func(z complex128) bool {
 			return cmplx.Abs(z) > 2
 		}
-		tmpJulia := &JuliaSet{currTransformation, escapeCondition, GreyScaleClear, maxItr, zoom}
+		tmpJulia := &JuliaSet{currTransformation, escapeCondition, GreyScaleClear, center,maxItr, zoom}
 		juliaSetList = append(juliaSetList, tmpJulia)
 
 		varyingC += cIncrement
@@ -126,7 +128,7 @@ func JuliaEvolution(functionClass utils.TwoParamEquation, cInit, cIncrement comp
 }
 
 // 2d evolution through parameter space
-func EvolveVideo(functionClass func(complex128,complex128) complex128, cInit, cIncrement complex128, numIncrements int, fps int, outputPath string, maxItr int, zoom float64) {
+func EvolveVideo(functionClass func(complex128,complex128) complex128, cInit, cIncrement complex128, numIncrements int, fps int, outputPath string, center complex128, maxItr int, zoom float64) {
 	dir, _ := os.MkdirTemp("","video")
 	defer os.RemoveAll(dir)
 
@@ -146,7 +148,7 @@ func EvolveVideo(functionClass func(complex128,complex128) complex128, cInit, cI
 				return cmplx.Abs(z) > 2
 			}
 
-			tmpJulia := JuliaSet{currTransformation, escapeCondition, GreyScale, maxItr, zoom}
+			tmpJulia := JuliaSet{currTransformation, escapeCondition, GreyScale, center ,maxItr, zoom}
 
 			filename := dir + fmt.Sprintf("/image%d.png", i)
 			tmpJulia.Draw(filename)

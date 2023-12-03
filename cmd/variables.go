@@ -3,6 +3,8 @@ package cmd
 // general
 var fps int
 
+var width int
+var height int
 
 // IFS variables
 var Path string
