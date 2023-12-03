@@ -14,16 +14,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var juliaEquation string
-var colored bool
-var fileName string
-
-var threeDimensional bool
-var cInitString string
-var cIncrementString string
-var numIncrements int
-var fps int
-
 var juliaCommand = &cobra.Command{
 	Use: "julia",
 	Short: "create a julia set",
@@ -43,23 +33,23 @@ var juliaCommand = &cobra.Command{
 		var js et.JuliaSet
 		if colored {
 			js = et.JuliaSet{
-				Transformation: utils.ParseEquation(juliaEquation),
-				EscapeCondition: func(c complex128) bool {
-					return cmplx.Abs(c) > 2
+				Transformation: utils.CreateOneParamEquation(juliaEquation),
+				EscapeCondition: func(z complex128) bool {
+					return cmplx.Abs(z) > 2
 				},
 				ColorGenerator: et.GenerateColor,
-				MaxItr: 100,
-				Zoom: 4,
+				MaxItr: maxItr,
+				Zoom: zoom,
 			}
 		} else {
 			js = et.JuliaSet{
-				Transformation: utils.ParseEquation(juliaEquation),
-				EscapeCondition: func(c complex128) bool {
-					return cmplx.Abs(c) > 2
+				Transformation: utils.CreateOneParamEquation(juliaEquation),
+				EscapeCondition: func(z complex128) bool {
+					return cmplx.Abs(z) > 2
 				},
 				ColorGenerator: et.GreyScale,
-				MaxItr: 100,
-				Zoom: 4,
+				MaxItr: maxItr,
+				Zoom: zoom,
 			}
 		}
 
@@ -82,10 +72,12 @@ var juliaEvolveCommand = &cobra.Command{
 		downloadsPath := filepath.Join(homeDir, "Downloads")
 
 		juliaSetlist := et.JuliaEvolution(
-			utils.ParseEquation2(juliaEquation),
+			utils.CreateTwoParamEquation(juliaEquation),
 			utils.ParseComplexString(cInitString),
 			utils.ParseComplexString(cIncrementString),
 			numIncrements,
+			maxItr,
+			zoom,
 		)
 		if threeDimensional {
 			stlFileName := downloadsPath + "/" + fileName+".stl"
@@ -147,12 +139,14 @@ var juliaEvolveCommand = &cobra.Command{
 			stlFile.WriteString("endsolid GeneratedModel\n")
 		} else {
 			et.EvolveVideo(
-				utils.ParseEquation2(juliaEquation),
+				utils.CreateTwoParamEquation(juliaEquation),
 				utils.ParseComplexString(cInitString),
 				utils.ParseComplexString(cIncrementString),
 				numIncrements,
 				fps,
 				downloadsPath + "/" + fileName + ".mp4",
+				maxItr,
+				zoom,
 			)
 		}
 	},
@@ -167,6 +161,11 @@ func init() {
 	juliaCommand.Flags().StringVarP(&juliaEquation, "equation", "e", "", "[REQUIRED] The equation for your julia set")
 	juliaCommand.Flags().BoolVarP(&colored, "color","c", false, "[OPTIONAL] Default Grey Scale")
 	juliaCommand.Flags().StringVarP(&fileName, "fileName", "F", "", "[REQUIRED] The file name in the downloads folder")
+
+	juliaCommand.Flags().Float64VarP(&zoom, "zoom","z",4,"[Optional] Set the zoom; smaller value is more zoomed in")
+
+	juliaCommand.Flags().IntVarP(&maxItr, "maxItr","m",1000,"[OPTIONAL] Set max iterations for time escape")
+
 	juliaCommand.MarkFlagRequired("equation")
 	juliaCommand.MarkFlagRequired("fileName")
 
@@ -181,4 +180,7 @@ func init() {
 
 	juliaEvolveCommand.Flags().BoolVarP(&threeDimensional, "threeDim","d", false, "[OPTIONAL] Create a 3d stl file of the evolution")
 	juliaEvolveCommand.Flags().IntVarP(&fps, "fps", "f", 10, "[OPTIONAL] The framerate of the video.")
+	juliaEvolveCommand.Flags().Float64VarP(&zoom, "zoom","z",4,"[Optional] Set the zoom; smaller value is more zoomed in")
+
+	juliaEvolveCommand.Flags().IntVarP(&maxItr, "maxItr","m",1000,"[OPTIONAL] Set max iterations for time escape")
 }

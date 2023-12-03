@@ -5,8 +5,8 @@ import (
 )
 
 const (
-	width = 200
-	height = 200
+	width = 1000
+	height = 1000
 	maxIterations = 1000
 )
 
@@ -45,5 +45,14 @@ func GenerateColor(itr int) color.RGBA {
 		G: uint8((itr * 73) % 256),
 		B: uint8((itr * 139) % 256),
 		A: 255,
+	}
+}
+
+func BurningColor(itr int) color.RGBA {
+	return color.RGBA{
+		R: 255,
+		G: uint8((itr * 7) % 256),
+		B: 0,
+		A: uint8((itr * 15) % 256),
 	}
 }

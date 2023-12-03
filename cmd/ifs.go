@@ -10,20 +10,6 @@ import (
 	BAR "github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"
 )
-var Path string
-var numIterations int
-var createVideo bool
-var algorithmProbabilistic bool
-var algorithmDeterministic bool
-var frameRate int
-var probabilitiesList []float64
-var random bool
-var numTransforms int
-var numPoints int
-var fractalStack bool
-var numStacks int
-var thickness float32
-
 
 /* // TODO
 var out string - let user specify where the image/video writes to
@@ -46,7 +32,7 @@ func init() {
 
 	ifsCmd.Flags().BoolVarP(&createVideo, "video","v", false, "[OPTIONAL] Whether to create a video or not")
 
-	ifsCmd.Flags().IntVarP(&frameRate, "fps", "f", 10, "[OPTIONAL] The framerate of the video.")
+	ifsCmd.Flags().IntVarP(&fps, "fps", "f", 10, "[OPTIONAL] The framerate of the video.")
 
 	ifsCmd.Flags().Float64SliceVar(&probabilitiesList, "probabilities", []float64{}, "[OPTIONAL - comma separated] Specify probabilities of transformations. Must add to 1. If none will calculated based on matrices. Note that a determinant of zero can cause unexpected things.")
 	ifsCmd.MarkFlagsMutuallyExclusive("algo-d", "probabilities")
@@ -165,7 +151,7 @@ var ifsCmd = &cobra.Command{
 				if createVideo {
 					bar := BAR.Default(int64(numIterations + 1), "Generating Fractals...")
 					progressCh := make(chan int)
-					go viz.VideoWrapper(width, height, downloadsPath+"/fractal_video.mp4", *newIfs, newIfs.RunProbabilisticStepWise, frameRate, progressCh)
+					go viz.VideoWrapper(width, height, downloadsPath+"/fractal_video.mp4", *newIfs, newIfs.RunProbabilisticStepWise, fps, progressCh)
 
 					// Monitor the progress channel and update the progress bar
 					for progress := range progressCh {
@@ -190,7 +176,7 @@ var ifsCmd = &cobra.Command{
 				if createVideo {
 					bar := BAR.Default(int64(numIterations + 1), "Generating Fractals...")
 					progressCh := make(chan int)
-					go viz.VideoWrapper(width, height, downloadsPath+"/fractal_video.mp4", *newIfs, newIfs.RunDeterministicStepWise, frameRate, progressCh)
+					go viz.VideoWrapper(width, height, downloadsPath+"/fractal_video.mp4", *newIfs, newIfs.RunDeterministicStepWise, fps, progressCh)
 					// Monitor the progress channel and update the progress bar
 					for progress := range progressCh {
 						bar.Set(progress)

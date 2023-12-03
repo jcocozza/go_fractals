@@ -12,18 +12,15 @@ import (
 	"github.com/jcocozza/go_fractals/utils"
 )
 
-// function f(z): C -> C
-type juliaTransformation func(complex128) complex128
-
 type JuliaSet struct {
-	Transformation juliaTransformation
+	Transformation utils.OneParamEquation
 	EscapeCondition escapeCondition
 	ColorGenerator colorGenerator
 	MaxItr int
 	Zoom float64
 }
 
-func NewJuliaSet(transform juliaTransformation, escape escapeCondition, colorGen colorGenerator, maxItr int, zoom float64) *JuliaSet {
+func NewJuliaSet(transform utils.OneParamEquation, escape escapeCondition, colorGen colorGenerator, maxItr int, zoom float64) *JuliaSet {
 	return &JuliaSet{
 		Transformation: transform,
 		EscapeCondition: escape,
@@ -101,7 +98,7 @@ func (s *JuliaSet) DrawFiltered(path string) *image.RGBA {
 	return img
 }
 
-func newTransform(funcClass func(complex128,complex128) complex128, varC complex128) func(complex128) complex128 {
+func newTransform(funcClass utils.TwoParamEquation, varC complex128) utils.OneParamEquation {
 	newT := func(z complex128) complex128 {
 		return funcClass(z,varC)
 	}
@@ -109,9 +106,7 @@ func newTransform(funcClass func(complex128,complex128) complex128, varC complex
 }
 
 // return a list of Julia Sets
-func JuliaEvolution(functionClass func(complex128,complex128) complex128, cInit, cIncrement complex128, numIncremenets int) []*JuliaSet {
-	maxItr := 1000
-	zoom := 4.0
+func JuliaEvolution(functionClass utils.TwoParamEquation, cInit, cIncrement complex128, numIncremenets int, maxItr int, zoom float64) []*JuliaSet {
 	varyingC := cInit
 
 	var juliaSetList []*JuliaSet
@@ -131,7 +126,7 @@ func JuliaEvolution(functionClass func(complex128,complex128) complex128, cInit,
 }
 
 // 2d evolution through parameter space
-func EvolveVideo(functionClass func(complex128,complex128) complex128, cInit, cIncrement complex128, numIncrements int, fps int, outputPath string) {
+func EvolveVideo(functionClass func(complex128,complex128) complex128, cInit, cIncrement complex128, numIncrements int, fps int, outputPath string, maxItr int, zoom float64) {
 	dir, _ := os.MkdirTemp("","video")
 	defer os.RemoveAll(dir)
 
@@ -151,8 +146,6 @@ func EvolveVideo(functionClass func(complex128,complex128) complex128, cInit, cI
 				return cmplx.Abs(z) > 2
 			}
 
-			maxItr := 1000
-			zoom := 4.0
 			tmpJulia := JuliaSet{currTransformation, escapeCondition, GreyScale, maxItr, zoom}
 
 			filename := dir + fmt.Sprintf("/image%d.png", i)
