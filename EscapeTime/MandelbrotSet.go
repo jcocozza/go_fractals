@@ -29,7 +29,7 @@ func (s *MandelbrotSet) CalcEscapeTime(c complex128) int {
 	return s.MaxItr
 }
 
-func (s *MandelbrotSet) Draw(path string) {
+func (s *MandelbrotSet) Draw(path string, width, height int) {
 	img := image.NewRGBA(image.Rect(0,0,width,height))
 
 	for x := 0; x < width; x++ {
@@ -37,8 +37,8 @@ func (s *MandelbrotSet) Draw(path string) {
 			//z := complex(float64(x-width/2)/width*s.Zoom, float64(y-height/2)/height*s.Zoom)
 
 			z := complex(
-                float64(x-width/2)/width*s.Zoom+real(s.Center),
-                float64(y-height/2)/height*s.Zoom+imag(s.Center),
+                float64(x-width/2)/float64(width)*s.Zoom+real(s.Center),
+                float64(y-height/2)/float64(height)*s.Zoom+imag(s.Center),
             )
 			escapeTime := s.CalcEscapeTime(z)
 			col := s.ColorGenerator(escapeTime)

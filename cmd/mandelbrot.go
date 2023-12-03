@@ -53,7 +53,7 @@ var mandelbrotCommand = &cobra.Command{
 				Zoom: zoom,
 			}
 		}
-		mbs.Draw(downloadsPath+"/"+fileName+".png")
+		mbs.Draw(downloadsPath+"/"+fileName+".png", width, height)
 	},
 }
 

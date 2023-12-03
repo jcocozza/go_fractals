@@ -58,7 +58,6 @@ var ifsCmd = &cobra.Command{
 	Long: "Pass in a file that contains an iterated function system",
 	Args: cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
-		const width, height = 1000,1000
 		// Get the user's home directory
 		homeDir, err := os.UserHomeDir()
 		if err != nil {

@@ -45,12 +45,12 @@ func (s *JuliaSet) CalcEscapeTime(z complex128) int {
 }
 
 // draw the julia set
-func (s *JuliaSet) Draw(path string) *image.RGBA {
+func (s *JuliaSet) Draw(path string, width,height int) *image.RGBA {
 	img := image.NewRGBA(image.Rect(0,0,width,height))
 
 	for x := 0; x < width; x++ {
 		for y := 0; y < height; y++ {
-			z := complex(float64(x-width/2)/width*s.Zoom, float64(y-height/2)/height*s.Zoom)
+			z := complex(float64(x-width/2)/float64(width)*s.Zoom, float64(y-height/2)/float64(height)*s.Zoom)
 			escapeTime := s.CalcEscapeTime(z)
 
 			col := s.ColorGenerator(escapeTime)
@@ -71,12 +71,12 @@ func (s *JuliaSet) Draw(path string) *image.RGBA {
 }
 
 // only draw points whose escape time is the max Iteration value
-func (s *JuliaSet) DrawFiltered(path string) *image.RGBA {
+func (s *JuliaSet) DrawFiltered(path string, width,height int) *image.RGBA {
 	img := image.NewRGBA(image.Rect(0,0,width,height))
 
 	for x := 0; x < width; x++ {
 		for y := 0; y < height; y++ {
-			z := complex(float64(x-width/2)/width*s.Zoom, float64(y-height/2)/height*s.Zoom)
+			z := complex(float64(x-width/2)/float64(width)*s.Zoom, float64(y-height/2)/float64(height)*s.Zoom)
 			escapeTime := s.CalcEscapeTime(z)
 
 			if escapeTime == s.MaxItr {
@@ -128,7 +128,7 @@ func JuliaEvolution(functionClass utils.TwoParamEquation, cInit, cIncrement comp
 }
 
 // 2d evolution through parameter space
-func EvolveVideo(functionClass func(complex128,complex128) complex128, cInit, cIncrement complex128, numIncrements int, fps int, outputPath string, center complex128, maxItr int, zoom float64) {
+func EvolveVideo(functionClass func(complex128,complex128) complex128, cInit, cIncrement complex128, numIncrements int, fps int, outputPath string, center complex128, maxItr int, zoom float64, width, height int) {
 	dir, _ := os.MkdirTemp("","video")
 	defer os.RemoveAll(dir)
 
@@ -151,7 +151,7 @@ func EvolveVideo(functionClass func(complex128,complex128) complex128, cInit, cI
 			tmpJulia := JuliaSet{currTransformation, escapeCondition, GreyScale, center ,maxItr, zoom}
 
 			filename := dir + fmt.Sprintf("/image%d.png", i)
-			tmpJulia.Draw(filename)
+			tmpJulia.Draw(filename, width, height)
 		}(i, varyingC)
 
 		varyingC += cIncrement

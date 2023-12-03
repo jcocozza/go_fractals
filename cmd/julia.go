@@ -55,7 +55,7 @@ var juliaCommand = &cobra.Command{
 			}
 		}
 
-		js.Draw(downloadsPath+"/"+fileName+".png")
+		js.Draw(downloadsPath+"/"+fileName+".png", width, height)
 	},
 }
 
@@ -106,7 +106,7 @@ var juliaEvolveCommand = &cobra.Command{
 					defer wg.Done() // Decrement the wait group counter when the goroutine completes
 
 					fName := fmt.Sprintf("tmp-%d.png", i)
-					img := js.DrawFiltered(fName) // create the images in parallel
+					img := js.DrawFiltered(fName, width, height) // create the images in parallel
 
 					// Send the *image.RGBA instance to the channel
 					imageChan <- struct {
@@ -151,6 +151,8 @@ var juliaEvolveCommand = &cobra.Command{
 				utils.ParseComplexString(centerPointString),
 				maxItr,
 				zoom,
+				width,
+				height,
 			)
 		}
 	},

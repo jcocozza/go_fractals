@@ -14,9 +14,8 @@ var rootCmd = &cobra.Command{
 }
 
 func init() {
-	// TODO NOT IMPLEMENTED YET
-	rootCmd.PersistentFlags().IntVarP(&width, "width", "w", 1000, "[OPTIONAL] Set width")
-	rootCmd.PersistentFlags().IntVarP(&height, "height", "h", 1000, "[OPTIONAL] Set height")
+	rootCmd.PersistentFlags().IntVarP(&width, "width", "W", 1000, "[OPTIONAL] Set width")
+	rootCmd.PersistentFlags().IntVarP(&height, "height", "H", 1000, "[OPTIONAL] Set height")
 }
 
 func Execute() {
