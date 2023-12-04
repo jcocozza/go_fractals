@@ -1,15 +1,14 @@
 package IteratedFunctionSystems
 
 import (
-	"fmt"
-	"math/rand"
 	"math"
+	"math/rand"
 	"time"
 
 	"github.com/jcocozza/go_fractals/utils"
 	"gonum.org/v1/gonum/mat"
+	"log/slog"
 )
-
 
 //An IteratedFunctionSystem is a list of Transformations
 type IteratedFunctionSystem struct {
@@ -57,7 +56,6 @@ func (ifs *IteratedFunctionSystem) Transform(point []float64) [][]float64 {
 		tempPoint, _ := ifs.TransformationList[i].Transform(point)
 		pointTransformationList[i] = tempPoint
 	}
-	//fmt.Println("Created Transformation Points:", pointTransformationList)
 	return pointTransformationList
 }
 
@@ -78,13 +76,11 @@ func (ifs *IteratedFunctionSystem) RunDeterministic() [][]float64 {
 		} else {
 			pointsList = tempPointList
 		}
-		//fmt.Println("Point Space:", pointsList)
 	}
 	endTime := time.Now()
 	elapsedTime := endTime.Sub(startTime)
-	fmt.Println("Total number of points:", len(pointsList))
-	//fmt.Println("Total number of Unique points:", utils.CalculateUniqueListElements(pointsList))
-	fmt.Printf("Elapsed time for Deterministic algorithm: %v\n", elapsedTime)
+	slog.Info("Total number of points:", len(pointsList))
+	slog.Info("Elapsed time for Deterministic algorithm: %v\n", elapsedTime)
 	return pointsList
 }
 
@@ -147,7 +143,7 @@ func (ifs *IteratedFunctionSystem) RunProbabilistic(probabilities []float64) [][
 	startTime := time.Now()
 	pointsList := ifs.InitialPoints
 	mostRecentPoints := ifs.InitialPoints
-	fmt.Println("probabilities:", probabilities)
+	slog.Info("probabilities: ", probabilities)
 	for i := 0; i < ifs.NumIterations; i++ {
 		utils.ProgressBar(i,ifs.NumIterations)
 		for j := 0; j < len(mostRecentPoints); j++ {
@@ -160,9 +156,8 @@ func (ifs *IteratedFunctionSystem) RunProbabilistic(probabilities []float64) [][
 	}
 	endTime := time.Now()
 	elapsedTime := endTime.Sub(startTime)
-	fmt.Println("Total number of points:", len(pointsList))
-	//fmt.Println("Total number of Unique points:", utils.CalculateUniqueListElements(pointsList))
-	fmt.Printf("Elapsed time for Probabilistic algorithm: %v\n", elapsedTime)
+	slog.Info("Total number of points: ", len(pointsList))
+	slog.Info("Elapsed time for Probabilistic algorithm: %v\n", elapsedTime)
 	return pointsList
 }
 

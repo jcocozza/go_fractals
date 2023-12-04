@@ -2,6 +2,7 @@ package IteratedFunctionSystems
 
 import (
 	"fmt"
+	"log/slog"
 	"strings"
 
 	"github.com/jcocozza/go_fractals/utils"
@@ -9,7 +10,7 @@ import (
 )
 
 func ParseIFS(filePath string) ([]Transformation, int) {
-	////fmt.Println("Reading from file:", Path)
+	slog.Debug("Reading from file:", filePath)
 	rowMatches := utils.Reader(filePath, `\[(.*?)\]`)
 
 	var transformationList []Transformation

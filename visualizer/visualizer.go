@@ -1,11 +1,11 @@
 package visualizer
 
 import (
-	"os"
 	"image"
 	"image/color"
 	"image/png"
-	"fmt"
+	"log/slog"
+	"os"
 )
 
 type FractalImage struct {
@@ -66,13 +66,11 @@ func (fi *FractalImage) WriteImage() {
 	// Save the image to a file
 	outputFile, err := os.Create(fi.Path)
 	if err != nil {
-		fmt.Println("Error creating file:", err)
+		slog.Error("Error creating file:", err)
 		return
 	}
 	defer outputFile.Close()
 	png.Encode(outputFile, fi.Img)
-
-	//fmt.Println("Fractal image saved as:", fi.Path)
 }
 
 // will "thicken" the image to become a 3d object

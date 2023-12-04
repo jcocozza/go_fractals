@@ -2,8 +2,9 @@ package visualizer
 
 import (
 	"fmt"
-	"os/exec"
+	"log/slog"
 	"os"
+	"os/exec"
 
 	IFS "github.com/jcocozza/go_fractals/IteratedFunctionSystems"
 	"github.com/jcocozza/go_fractals/utils"
@@ -35,7 +36,6 @@ func VideoWrapper(width int, height int, fileName string, ifs IFS.IteratedFuncti
 	for i := 0; i < fv.IFSys.NumIterations; i ++ {
 		newPoints = stepWiseAlgo(newPoints)
 		pointAccumulator = append(pointAccumulator, newPoints...)
-		//fmt.Println("POINT SET:", pointAccumulator)
 		fractal := NewFractalImage(fv.Width, fv.Height, fmt.Sprintf(dir+"/image%d.png", i), pointAccumulator)
 		fractal.WriteImage()
 		progressCh <- (i + 1)
@@ -69,8 +69,7 @@ func (fv *FractalVideo) createVideo(tmpDir string) {
 
 	err := cmd.Run()
 	if err != nil {
-		fmt.Println("Error:", err)
+		slog.Error("Error:", err)
 	}
-	//fmt.Println("Fractal Video Created")
 	utils.DeleteFiles("video", "imag*.png") // clean up images afterwards
 }

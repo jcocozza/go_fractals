@@ -61,7 +61,6 @@ var ifsCmd = &cobra.Command{
 		if random {
 			randIFS := IFS.GenerateRandomIFS(2, numTransforms)
 			pointsList := randIFS.RunProbabilistic(randIFS.CalculateProbabilities())
-			//fmt.Println("POints list", pointsList[1])
 			fractal := viz.NewFractalImage(width, height, downloadsPath+"/random_fractal.png", pointsList)
 			fractal.WriteImage()
 			return

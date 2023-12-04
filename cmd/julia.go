@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"image"
+	"log/slog"
 	"math/cmplx"
 	"os"
 	"sync"
@@ -70,10 +71,10 @@ var juliaEvolveCommand = &cobra.Command{
 			zoom,
 		)
 		if threeDimensional {
-			stlFileName := downloadsPath + "/" + fileName+".stl"
+			stlFileName := downloadsPath + "/" + fileName + ".stl"
 			stlFile, err := os.Create(stlFileName)
 			if err != nil {
-				fmt.Println("Error creating STL file:", err)
+				slog.Error("Error creating STL file:", err)
 				return
 			}
 			defer stlFile.Close()

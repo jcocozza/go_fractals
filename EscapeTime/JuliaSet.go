@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image"
 	"image/png"
+	"log/slog"
 	"math/cmplx"
 	"os"
 	"os/exec"
@@ -157,7 +158,7 @@ func EvolveVideo(functionClass func(complex128,complex128) complex128, cInit, cI
 		varyingC += cIncrement
 	}
 
-	wg.Wait() // Wait for all goroutines to finish
+	wg.Wait()
 
 	inputPattern := dir+"/image%01d.png"
 	outputVideo := outputPath
@@ -172,8 +173,8 @@ func EvolveVideo(functionClass func(complex128,complex128) complex128, cInit, cI
 	out, err := cmd.CombinedOutput()
 
 	if err != nil {
-		fmt.Println("Error running ffmpeg command:", err)
-		fmt.Println("Combined Output:", string(out))
+		slog.Error("Error running ffmpeg command:", err)
+		slog.Error("Combined Output: " + string(out))
 		return
 	}
 	utils.DeleteFiles("video", "imag*.png") // clean up images afterwards

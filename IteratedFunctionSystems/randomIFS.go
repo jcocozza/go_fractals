@@ -1,9 +1,10 @@
 package IteratedFunctionSystems
 
 import (
-	"gonum.org/v1/gonum/mat"
+	"log/slog"
 	"math/rand"
-	"fmt"
+
+	"gonum.org/v1/gonum/mat"
 )
 
 func generateRandomMatrix(rows int, cols int) mat.Dense {
@@ -13,7 +14,7 @@ func generateRandomMatrix(rows int, cols int) mat.Dense {
 			matrixData = append(matrixData, rand.Float64()*2 - 1)
 		}
 	}
-	fmt.Println("New Matrix generated:", matrixData)
+	slog.Info("New Matrix generated:", matrixData)
 	return *mat.NewDense(rows, cols, matrixData)
 
 }

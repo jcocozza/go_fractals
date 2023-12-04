@@ -3,12 +3,14 @@ package stack
 import (
 	"encoding/binary"
 	"fmt"
+	"log/slog"
 	"os"
 
-	"github.com/jcocozza/go_fractals/utils"
 	IFS "github.com/jcocozza/go_fractals/IteratedFunctionSystems"
+	"github.com/jcocozza/go_fractals/utils"
 	viz "github.com/jcocozza/go_fractals/visualizer"
 )
+
 // combine a set of fractals together
 func CreateFractalStack(ifspath string, numStacks int, thickness float32, outputPath string) {
 	transformList, dim := IFS.ParseIFS(ifspath)
@@ -60,7 +62,7 @@ func saveSTL(mesh [][]float32, filePath string) {
 	// Create an STL file with the given mesh
 	file, err := os.Create(filePath)
 	if err != nil {
-		fmt.Println("Error creating STL file:", err)
+		slog.Error("Error creating STL file:", err)
 		os.Exit(1)
 	}
 	defer file.Close()

@@ -3,6 +3,7 @@ package visualizer
 import (
 	"fmt"
 	"log"
+	"log/slog"
 	"runtime"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
@@ -174,19 +175,19 @@ func Draw3D(pointsList [][]float64) {
 
 		// Inside the main loop
 		if window.GetKey(glfw.KeyLeft) == glfw.Press {
-			//fmt.Println("KEY PRESSED LEFT")g
+			slog.Debug("KEY PRESSED LEFT")
 			rotationY += 1.0 // Adjust the rotation angle as needed
 		}
 		if window.GetKey(glfw.KeyRight) == glfw.Press {
-			//fmt.Println("KEY PRESSED RIGHT")
+			slog.Debug("KEY PRESSED RIGHT")
 			rotationY -= 1.0 // Adjust the rotation angle as needed
 		}
 		if window.GetKey(glfw.KeyUp) == glfw.Press {
-			//fmt.Println("KEY PRESSED UP")
+			slog.Debug("KEY PRESSED UP")
 			rotationX += 1.0 // Adjust the rotation angle as needed
 		}
 		if window.GetKey(glfw.KeyDown) == glfw.Press {
-			//fmt.Println("KEY PRESSED DOWN")
+			slog.Debug("KEY PRESSED DOWN")
 			rotationX += -1.0 // Adjust the rotation angle as needed
 		}
 		// Add more conditions for other keys or axes
