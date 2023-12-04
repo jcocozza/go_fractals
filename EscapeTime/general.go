@@ -1,12 +1,12 @@
 package EscapeTime
 
 import (
+	"image"
 	"image/color"
-)
 
-const (
-	width = 2000
-	height = 2000
+	"golang.org/x/image/font"
+	"golang.org/x/image/font/basicfont"
+	"golang.org/x/image/math/fixed"
 )
 
 // return true if the input has escaped
@@ -14,6 +14,17 @@ type escapeCondition func(complex128) bool
 
 // return a color based on escape time
 type colorGenerator func(int) color.RGBA
+
+// add text to an image
+func DrawText(img *image.RGBA, text string, x, y int) {
+	d := &font.Drawer{
+		Dst:  img,
+		Src:  image.NewUniform(color.White),
+		Face: basicfont.Face7x13,
+		Dot:  fixed.Point26_6{X: fixed.I(x), Y: fixed.I(y)},
+	}
+	d.DrawString(text)
+}
 
 // return grey scale based on number of iterations
 func GreyScale(itr int) color.RGBA {

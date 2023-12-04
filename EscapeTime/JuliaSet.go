@@ -57,7 +57,7 @@ func (s *JuliaSet) Draw(path string, width,height int) *image.RGBA {
 			img.Set(x,y,col)
 		}
 	}
-
+	//DrawText(img, "Your Text Here", width-150, 20)
 	file, err := os.Create(path)
 	if err != nil {
 		panic(err)

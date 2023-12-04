@@ -7,11 +7,15 @@ import (
 )
 
 const (
-	cuboidWidth  = 1.0
-	cuboidHeight = 1.0
-	cuboidDepth  = 10.1
+	cubeSize    = 1.0
+	facetNormal = "  facet normal %f %f %f\n"
+	outerLoop   = "    outer loop\n"
+	vertex      = "      vertex %f %f %f\n"
+	endLoop     = "    endloop\n"
+	endFacet    = "  endfacet\n"
 )
 
+// for each non-transparent pixel in the image, draw
 func DrawJuliaSet3D(img image.Image, stlFile *os.File, shift float64) {
 	// Loop through pixels and generate cuboids for non-transparent pixels
 	bounds := img.Bounds()
@@ -21,51 +25,108 @@ func DrawJuliaSet3D(img image.Image, stlFile *os.File, shift float64) {
 			_, _, _, alpha := pixel.RGBA()
 
 			if alpha > 0 {
-				writeCuboid(stlFile, float64(x), float64(y), shift)
+				writeCube(stlFile, float64(x), float64(y), shift)
 			}
 		}
 	}
 }
 
-func loadImage(filename string) (image.Image, error) {
-	file, err := os.Open(filename)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
+// draw a cube at an (x,y,z) coordinate
+func writeCube(file *os.File, x, y, z float64) {
+		// Write ASCII STL representation of a facet
+		file.WriteString(fmt.Sprintf(facetNormal, 0.0, 0.0, -1.0))
+		file.WriteString(fmt.Sprintf(outerLoop))
+		file.WriteString(fmt.Sprintf(vertex, x, y, z))
+		file.WriteString(fmt.Sprintf(vertex, x + cubeSize, y + cubeSize,z))
+		file.WriteString(fmt.Sprintf(vertex, x + cubeSize, y,z))
+		file.WriteString(fmt.Sprintf(endLoop))
+		file.WriteString(fmt.Sprintf(endFacet))
 
-	img, _, err := image.Decode(file)
-	if err != nil {
-		return nil, err
-	}
+		file.WriteString(fmt.Sprintf(facetNormal, 0.0, 0.0, -1.0))
+		file.WriteString(fmt.Sprintf(outerLoop))
+		file.WriteString(fmt.Sprintf(vertex, x, y, z))
+		file.WriteString(fmt.Sprintf(vertex, x, y + cubeSize, z))
+		file.WriteString(fmt.Sprintf(vertex, x + cubeSize, y + cubeSize, z))
+		file.WriteString(fmt.Sprintf(endLoop))
+		file.WriteString(fmt.Sprintf(endFacet))
 
-	return img, nil
-}
+		file.WriteString(fmt.Sprintf(facetNormal, -1.0,0.0,0.0))
+		file.WriteString(fmt.Sprintf(outerLoop))
+		file.WriteString(fmt.Sprintf(vertex, x, y, z))
+		file.WriteString(fmt.Sprintf(vertex, x, y + cubeSize, z + cubeSize))
+		file.WriteString(fmt.Sprintf(vertex, x, y + cubeSize, z))
+		file.WriteString(fmt.Sprintf(endLoop))
+		file.WriteString(fmt.Sprintf(endFacet))
 
-func writeCuboid(file *os.File, x, y, z float64) {
-	// Write ASCII STL representation of a cuboid
-	// Bottom face
-	writeFacet(file, x, y, z, x+cuboidWidth, y, z, x+cuboidWidth, y+cuboidHeight, z)
-	writeFacet(file, x, y, z, x+cuboidWidth, y+cuboidHeight, z, x, y+cuboidHeight, z)
+		file.WriteString(fmt.Sprintf(facetNormal, -1.0,0.0,0.0))
+		file.WriteString(fmt.Sprintf(outerLoop))
+		file.WriteString(fmt.Sprintf(vertex, x, y, z))
+		file.WriteString(fmt.Sprintf(vertex, x, y, z + cubeSize))
+		file.WriteString(fmt.Sprintf(vertex, x, y + cubeSize, z + cubeSize))
+		file.WriteString(fmt.Sprintf(endLoop))
+		file.WriteString(fmt.Sprintf(endFacet))
 
-	// Top face
-	writeFacet(file, x, y, z+cuboidDepth, x+cuboidWidth, y, z+cuboidDepth, x+cuboidWidth, y+cuboidHeight, z+cuboidDepth)
-	writeFacet(file, x, y, z+cuboidDepth, x+cuboidWidth, y+cuboidHeight, z+cuboidDepth, x, y+cuboidHeight, z+cuboidDepth)
+		file.WriteString(fmt.Sprintf(facetNormal, 0.0,1.0,0.0))
+		file.WriteString(fmt.Sprintf(outerLoop))
+		file.WriteString(fmt.Sprintf(vertex, x, y + cubeSize, z))
+		file.WriteString(fmt.Sprintf(vertex, x + cubeSize, y + cubeSize, z + cubeSize))
+		file.WriteString(fmt.Sprintf(vertex, x + cubeSize, y + cubeSize, z))
+		file.WriteString(fmt.Sprintf(endLoop))
+		file.WriteString(fmt.Sprintf(endFacet))
 
-	// Side faces
-	writeFacet(file, x, y, z, x, y+cuboidHeight, z, x, y, z+cuboidDepth)
-	writeFacet(file, x+cuboidWidth, y, z, x+cuboidWidth, y, z+cuboidDepth, x+cuboidWidth, y+cuboidHeight, z)
-	writeFacet(file, x+cuboidWidth, y+cuboidHeight, z, x+cuboidWidth, y+cuboidHeight, z+cuboidDepth, x, y+cuboidHeight, z)
-	writeFacet(file, x, y+cuboidHeight, z, x, y+cuboidHeight, z+cuboidDepth, x, y, z)
-}
+		file.WriteString(fmt.Sprintf(facetNormal, 0.0,1.0,0.0))
+		file.WriteString(fmt.Sprintf(outerLoop))
+		file.WriteString(fmt.Sprintf(vertex, x, y + cubeSize, z))
+		file.WriteString(fmt.Sprintf(vertex, x, y + cubeSize, z + cubeSize))
+		file.WriteString(fmt.Sprintf(vertex, x + cubeSize, y + cubeSize, z + cubeSize))
+		file.WriteString(fmt.Sprintf(endLoop))
+		file.WriteString(fmt.Sprintf(endFacet))
 
-func writeFacet(file *os.File, x1, y1, z1, x2, y2, z2, x3, y3, z3 float64) {
-	// Write ASCII STL representation of a facet
-	file.WriteString(fmt.Sprintf("  facet normal 0 0 0\n"))
-	file.WriteString(fmt.Sprintf("    outer loop\n"))
-	file.WriteString(fmt.Sprintf("      vertex %f %f %f\n", x1, y1, z1))
-	file.WriteString(fmt.Sprintf("      vertex %f %f %f\n", x2, y2, z2))
-	file.WriteString(fmt.Sprintf("      vertex %f %f %f\n", x3, y3, z3))
-	file.WriteString(fmt.Sprintf("    endloop\n"))
-	file.WriteString(fmt.Sprintf("  endfacet\n"))
+		file.WriteString(fmt.Sprintf(facetNormal, 1.0,0.0,0.0))
+		file.WriteString(fmt.Sprintf(outerLoop))
+		file.WriteString(fmt.Sprintf(vertex, x + cubeSize, y, z))
+		file.WriteString(fmt.Sprintf(vertex, x + cubeSize, y + cubeSize, z))
+		file.WriteString(fmt.Sprintf(vertex, x + cubeSize, y + cubeSize, z + cubeSize))
+		file.WriteString(fmt.Sprintf(endLoop))
+		file.WriteString(fmt.Sprintf(endFacet))
+
+		file.WriteString(fmt.Sprintf(facetNormal, 1.0,0.0,0.0))
+		file.WriteString(fmt.Sprintf(outerLoop))
+		file.WriteString(fmt.Sprintf(vertex, x + cubeSize, y, z))
+		file.WriteString(fmt.Sprintf(vertex, x + cubeSize, y + cubeSize, z + cubeSize))
+		file.WriteString(fmt.Sprintf(vertex, x + cubeSize, y, z + cubeSize))
+		file.WriteString(fmt.Sprintf(endLoop))
+		file.WriteString(fmt.Sprintf(endFacet))
+
+		file.WriteString(fmt.Sprintf(facetNormal, 0.0,-1.0,0.0))
+		file.WriteString(fmt.Sprintf(outerLoop))
+		file.WriteString(fmt.Sprintf(vertex, x, y, z))
+		file.WriteString(fmt.Sprintf(vertex, x + cubeSize, y, z))
+		file.WriteString(fmt.Sprintf(vertex, x + cubeSize, y, z + cubeSize))
+		file.WriteString(fmt.Sprintf(endLoop))
+		file.WriteString(fmt.Sprintf(endFacet))
+
+		file.WriteString(fmt.Sprintf(facetNormal, 0.0,-1.0,0.0))
+		file.WriteString(fmt.Sprintf(outerLoop))
+		file.WriteString(fmt.Sprintf(vertex, x, y, z))
+		file.WriteString(fmt.Sprintf(vertex, x + cubeSize, y, z + cubeSize))
+		file.WriteString(fmt.Sprintf(vertex, x, y, z + cubeSize))
+		file.WriteString(fmt.Sprintf(endLoop))
+		file.WriteString(fmt.Sprintf(endFacet))
+
+		file.WriteString(fmt.Sprintf(facetNormal, 0.0,0.0,1.0))
+		file.WriteString(fmt.Sprintf(outerLoop))
+		file.WriteString(fmt.Sprintf(vertex, x, y, z + cubeSize))
+		file.WriteString(fmt.Sprintf(vertex, x + cubeSize, y, z + cubeSize))
+		file.WriteString(fmt.Sprintf(vertex, x + cubeSize, y + cubeSize, z + cubeSize))
+		file.WriteString(fmt.Sprintf(endLoop))
+		file.WriteString(fmt.Sprintf(endFacet))
+
+		file.WriteString(fmt.Sprintf(facetNormal, 0.0,0.0,1.0))
+		file.WriteString(fmt.Sprintf(outerLoop))
+		file.WriteString(fmt.Sprintf(vertex, x, y, z + cubeSize))
+		file.WriteString(fmt.Sprintf(vertex, x + cubeSize, y + cubeSize, z + cubeSize))
+		file.WriteString(fmt.Sprintf(vertex, x, y + cubeSize, z))
+		file.WriteString(fmt.Sprintf(endLoop))
+		file.WriteString(fmt.Sprintf(endFacet))
 }

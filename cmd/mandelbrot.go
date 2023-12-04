@@ -1,10 +1,7 @@
 package cmd
 
 import (
-	"fmt"
 	"math/cmplx"
-	"os"
-	"path/filepath"
 
 	et "github.com/jcocozza/go_fractals/EscapeTime"
 	"github.com/jcocozza/go_fractals/utils"
@@ -19,13 +16,7 @@ var mandelbrotCommand = &cobra.Command{
 	Args: cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 
-		homeDir, err := os.UserHomeDir()
-		if err != nil {
-			fmt.Println("Error getting user's home directory:", err)
-			return
-		}
-		// Construct the path to the Downloads folder
-		downloadsPath := filepath.Join(homeDir, "Downloads")
+		downloadsPath := utils.GetDownloadDir()
 
 		var mbs et.MandelbrotSet
 		if colored {

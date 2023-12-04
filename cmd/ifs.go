@@ -1,11 +1,9 @@
 package cmd
 
 import (
-	"os"
-	"path/filepath"
-
 	IFS "github.com/jcocozza/go_fractals/IteratedFunctionSystems"
 	"github.com/jcocozza/go_fractals/stack"
+	"github.com/jcocozza/go_fractals/utils"
 	viz "github.com/jcocozza/go_fractals/visualizer"
 	BAR "github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"
@@ -58,16 +56,7 @@ var ifsCmd = &cobra.Command{
 	Long: "Pass in a file that contains an iterated function system",
 	Args: cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
-		// Get the user's home directory
-		homeDir, err := os.UserHomeDir()
-		if err != nil {
-			//fmt.Println("Error getting user's home directory:", err)
-			return
-		}
-
-		// Construct the path to the Downloads folder
-		downloadsPath := filepath.Join(homeDir, "Downloads")
-
+		downloadsPath := utils.GetDownloadDir()
 
 		if random {
 			randIFS := IFS.GenerateRandomIFS(2, numTransforms)

@@ -5,7 +5,6 @@ import (
 	"image"
 	"math/cmplx"
 	"os"
-	"path/filepath"
 	"sync"
 
 	et "github.com/jcocozza/go_fractals/EscapeTime"
@@ -21,13 +20,7 @@ var juliaCommand = &cobra.Command{
 	Args: cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 
-		homeDir, err := os.UserHomeDir()
-		if err != nil {
-			fmt.Println("Error getting user's home directory:", err)
-			return
-		}
-		// Construct the path to the Downloads folder
-		downloadsPath := filepath.Join(homeDir, "Downloads")
+		downloadsPath := utils.GetDownloadDir()
 
 
 		var js et.JuliaSet
@@ -65,13 +58,7 @@ var juliaEvolveCommand = &cobra.Command{
 	Long: "Create a video or 3d stl of the julia set evolving through parameter space",
 	Args: cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
-		homeDir, err := os.UserHomeDir()
-		if err != nil {
-			fmt.Println("Error getting user's home directory:", err)
-			return
-		}
-		// Construct the path to the Downloads folder
-		downloadsPath := filepath.Join(homeDir, "Downloads")
+		downloadsPath := utils.GetDownloadDir()
 
 		juliaSetlist := et.JuliaEvolution(
 			utils.CreateTwoParamEquation(juliaEquation),
@@ -136,7 +123,7 @@ var juliaEvolveCommand = &cobra.Command{
 			for i, imgStruct := range images { //add to the stl file(seqentially)
 				utils.ProgressBar(i, len(images))
 				et.DrawJuliaSet3D(imgStruct.Image, stlFile, shift)
-				shift += 10
+				shift += 1
 			}
 
 			stlFile.WriteString("endsolid GeneratedModel\n")
