@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/binary"
 	"fmt"
 	"image"
 	"log/slog"
@@ -79,14 +80,12 @@ var juliaEvolveCommand = &cobra.Command{
 			}
 			defer stlFile.Close()
 
-			stlFile.WriteString("solid GeneratedModel\n")
 			imageChan := make(chan struct {
 				Index int // to ensure proper indexing of channel
 				Image *image.RGBA
 			}, len(juliaSetlist))
 
 			var wg sync.WaitGroup
-
 			for i, js := range juliaSetlist {
 				wg.Add(1) // Increment the wait group counter
 
@@ -121,13 +120,37 @@ var juliaEvolveCommand = &cobra.Command{
 			}
 
 			shift := 0.0
-			for i, imgStruct := range images { //add to the stl file(seqentially)
-				utils.ProgressBar(i, len(images))
-				et.DrawJuliaSet3D(imgStruct.Image, stlFile, shift)
-				shift += 1
+
+			if writeBinary {
+				var totPixels int = 0
+				for _, imgStruct := range images {
+					totPixels += utils.GetNumNonTransparentPixels(imgStruct.Image)
+				}
+
+				// Write 80-byte header
+				header := make([]byte, et.HeaderSize)
+				stlFile.Write(header)
+				// Write 4-byte facet count (uint32)
+				numFacets := uint32(totPixels * 12) // Assuming 12 facets for a cube
+				binary.Write(stlFile, binary.LittleEndian, numFacets)
+
+				for i, imgStruct := range images {
+					utils.ProgressBar(i, len(images))
+					et.DrawJuliaSet3DBinary(imgStruct.Image, stlFile, shift)
+					shift += 1
+				}
+
+			} else {
+				stlFile.WriteString("solid GeneratedModel\n")
+				for i, imgStruct := range images { //add to the stl file(seqentially)
+					utils.ProgressBar(i, len(images))
+					et.DrawJuliaSet3D(imgStruct.Image, stlFile, shift)
+					shift += 1
+				}
+				stlFile.WriteString("endsolid GeneratedModel\n")
 			}
 
-			stlFile.WriteString("endsolid GeneratedModel\n")
+
 		} else {
 			et.EvolveVideo(
 				utils.CreateTwoParamEquation(juliaEquation),
@@ -175,6 +198,7 @@ func init() {
 	juliaEvolveCommand.MarkFlagsRequiredTogether("equation", "initialComplex", "complexIncrement", "numIncrements")
 
 	juliaEvolveCommand.Flags().BoolVarP(&threeDimensional, "threeDim","d", false, "[OPTIONAL] Create a 3d stl file of the evolution")
+	juliaEvolveCommand.Flags().BoolVarP(&writeBinary, "binary","b", false, "[OPTIONAL] save the stl as a binary")
 	juliaEvolveCommand.Flags().IntVarP(&fps, "fps", "f", 10, "[OPTIONAL] The framerate of the video.")
 	juliaEvolveCommand.Flags().Float64VarP(&zoom, "zoom","z",4,"[Optional] Set the zoom; smaller value is more zoomed in")
 

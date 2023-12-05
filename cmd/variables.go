@@ -29,6 +29,8 @@ var threeDimensional bool
 var cInitString string
 var cIncrementString string
 var numIncrements int
+var writeBinary bool
+
 
 var mandelbrotEquation string
 var centerPointString string
