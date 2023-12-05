@@ -18,8 +18,43 @@ const (
 	HeaderSize  = 80
 )
 
-// for each non-transparent pixel in the image, draw
-func DrawJuliaSet3D(img image.Image, stlFile *os.File, shift float64) {
+// function to get alpha value of a pixel, handling out-of-bounds gracefully
+func getAlpha(img image.Image, x, y int) uint32 {
+	bounds := img.Bounds()
+	if x >= bounds.Min.X && x < bounds.Max.X && y >= bounds.Min.Y && y < bounds.Max.Y {
+		pixel := img.At(x, y)
+		_, _, _, alpha := pixel.RGBA()
+		return alpha
+	}
+	return 0
+}
+
+// if any adjacent points are transparent, then the non-transparent pixel is on the boundary
+func isTransition(img image.Image, x,y int) bool {
+	alphaLeft := getAlpha(img, x-1, y)
+	alphaRight := getAlpha(img, x+1, y)
+	alphaUp := getAlpha(img, x, y-1)
+	alphaDown := getAlpha(img, x, y+1)
+
+	return alphaLeft == 0 || alphaRight == 0 || alphaUp == 0 || alphaDown == 0
+}
+
+// check if the pixel in the current image will be "covered" by pixels in other images
+// the specific use case is in an ordered list of images
+// x,y will be apoint in the current image, and images will be a list of future images
+func isCovered(x,y int, images []image.Image) bool {
+	for _, img := range images {
+		pixel := img.At(x, y)
+			_, _, _, alpha := pixel.RGBA()
+			if alpha > 0 {
+				return true
+			}
+	}
+	return false
+}
+
+// for each non-transparent pixel in the image, draw a thickend, filled julia set
+func DrawJuliaSet3DFilled(img image.Image, stlFile *os.File, shift float64) {
 	// Loop through pixels and generate cuboids for non-transparent pixels
 	bounds := img.Bounds()
 	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
@@ -29,6 +64,28 @@ func DrawJuliaSet3D(img image.Image, stlFile *os.File, shift float64) {
 
 			if alpha > 0 {
 				writeCube(stlFile, float64(x), float64(y), shift)
+			}
+		}
+	}
+}
+
+
+// for each non-transparent pixel in the image, draw a thickend, outline of the set
+// images is the list of images that will be stacked on top of the passed img.
+func DrawJuliaSet3DEmpty(img image.Image, images []image.Image, stlFile *os.File, shift float64) {
+	// Loop through pixels and generate cuboids for non-transparent pixels
+	bounds := img.Bounds()
+	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
+		for x := bounds.Min.X; x < bounds.Max.X; x++ {
+			pixel := img.At(x, y)
+			_, _, _, alpha := pixel.RGBA()
+
+			if alpha > 0 {
+				if !isCovered(x,y, images) {
+					writeCube(stlFile, float64(x), float64(y), shift)
+				} else if isTransition(img, x,y) {
+					writeCube(stlFile, float64(x), float64(y), shift)
+				}
 			}
 		}
 	}

@@ -30,6 +30,7 @@ var cInitString string
 var cIncrementString string
 var numIncrements int
 var writeBinary bool
+var solid bool
 
 
 var mandelbrotEquation string

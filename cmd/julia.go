@@ -140,17 +140,28 @@ var juliaEvolveCommand = &cobra.Command{
 					shift += 1
 				}
 
-			} else {
+			} else if solid {
 				stlFile.WriteString("solid GeneratedModel\n")
 				for i, imgStruct := range images { //add to the stl file(seqentially)
 					utils.ProgressBar(i, len(images))
-					et.DrawJuliaSet3D(imgStruct.Image, stlFile, shift)
+					et.DrawJuliaSet3DFilled(imgStruct.Image, stlFile, shift)
+					shift += 1
+				}
+				stlFile.WriteString("endsolid GeneratedModel\n")
+			} else {
+				stlFile.WriteString("solid GeneratedModel\n")
+				var imgList []image.Image
+				for _,imgStruct := range images {
+					imgList = append(imgList, imgStruct.Image)
+				}
+
+				for i,img := range imgList {
+					utils.ProgressBar(i, len(imgList))
+					et.DrawJuliaSet3DEmpty(img, imgList[i+1:], stlFile, shift)
 					shift += 1
 				}
 				stlFile.WriteString("endsolid GeneratedModel\n")
 			}
-
-
 		} else {
 			et.EvolveVideo(
 				utils.CreateTwoParamEquation(juliaEquation),
@@ -199,6 +210,7 @@ func init() {
 
 	juliaEvolveCommand.Flags().BoolVarP(&threeDimensional, "threeDim","d", false, "[OPTIONAL] Create a 3d stl file of the evolution")
 	juliaEvolveCommand.Flags().BoolVarP(&writeBinary, "binary","b", false, "[OPTIONAL] save the stl as a binary")
+	juliaEvolveCommand.Flags().BoolVarP(&solid, "solid","s", false, "[OPTIONAL] write the stl as a completely solid object(much larger file size)")
 	juliaEvolveCommand.Flags().IntVarP(&fps, "fps", "f", 10, "[OPTIONAL] The framerate of the video.")
 	juliaEvolveCommand.Flags().Float64VarP(&zoom, "zoom","z",4,"[Optional] Set the zoom; smaller value is more zoomed in")
 
