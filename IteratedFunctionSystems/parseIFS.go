@@ -10,7 +10,7 @@ import (
 )
 
 func ParseIFS(filePath string) ([]Transformation, int) {
-	slog.Debug("Reading from file:", filePath)
+	slog.Debug("Reading from file: " + filePath)
 	rowMatches := utils.Reader(filePath, `\[(.*?)\]`)
 
 	var transformationList []Transformation

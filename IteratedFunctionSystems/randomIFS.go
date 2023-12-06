@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"math/rand"
 
+	"github.com/jcocozza/go_fractals/utils"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -14,7 +15,7 @@ func generateRandomMatrix(rows int, cols int) mat.Dense {
 			matrixData = append(matrixData, rand.Float64()*2 - 1)
 		}
 	}
-	slog.Info("New Matrix generated:", matrixData)
+	slog.Info("New Matrix generated: " + utils.ListToString(matrixData))
 	return *mat.NewDense(rows, cols, matrixData)
 
 }

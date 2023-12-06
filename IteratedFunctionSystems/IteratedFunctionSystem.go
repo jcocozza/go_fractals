@@ -1,13 +1,15 @@
 package IteratedFunctionSystems
 
 import (
+	"fmt"
 	"math"
 	"math/rand"
 	"time"
 
+	"log/slog"
+
 	"github.com/jcocozza/go_fractals/utils"
 	"gonum.org/v1/gonum/mat"
-	"log/slog"
 )
 
 //An IteratedFunctionSystem is a list of Transformations
@@ -79,8 +81,8 @@ func (ifs *IteratedFunctionSystem) RunDeterministic() [][]float64 {
 	}
 	endTime := time.Now()
 	elapsedTime := endTime.Sub(startTime)
-	slog.Info("Total number of points:", len(pointsList))
-	slog.Info("Elapsed time for Deterministic algorithm: %v\n", elapsedTime)
+	slog.Info(fmt.Sprintf("Total number of points: %d", len(pointsList)))
+	slog.Info(fmt.Sprintf("Elapsed time for Deterministic algorithm: %v\n", elapsedTime))
 	return pointsList
 }
 
@@ -143,7 +145,7 @@ func (ifs *IteratedFunctionSystem) RunProbabilistic(probabilities []float64) [][
 	startTime := time.Now()
 	pointsList := ifs.InitialPoints
 	mostRecentPoints := ifs.InitialPoints
-	slog.Info("probabilities: ", probabilities)
+	slog.Info("probabilities: " + utils.ListToString(probabilities))
 	for i := 0; i < ifs.NumIterations; i++ {
 		utils.ProgressBar(i,ifs.NumIterations)
 		for j := 0; j < len(mostRecentPoints); j++ {
@@ -156,8 +158,8 @@ func (ifs *IteratedFunctionSystem) RunProbabilistic(probabilities []float64) [][
 	}
 	endTime := time.Now()
 	elapsedTime := endTime.Sub(startTime)
-	slog.Info("Total number of points: ", len(pointsList))
-	slog.Info("Elapsed time for Probabilistic algorithm: %v\n", elapsedTime)
+	slog.Info(fmt.Sprintf("Total number of points: %d", len(pointsList)))
+	slog.Info(fmt.Sprintf("Elapsed time for Probabilistic algorithm: %v", elapsedTime))
 	return pointsList
 }
 
