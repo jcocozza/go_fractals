@@ -1,16 +1,14 @@
 package cmd
 
 import (
-	"encoding/binary"
 	"fmt"
 	"image"
-	"log/slog"
 	"math/cmplx"
-	"os"
 	"sync"
 
 	et "github.com/jcocozza/go_fractals/EscapeTime"
 	"github.com/jcocozza/go_fractals/utils"
+	IMGS "github.com/jcocozza/go_fractals/images"
 
 	"github.com/spf13/cobra"
 )
@@ -72,14 +70,7 @@ var juliaEvolveCommand = &cobra.Command{
 			zoom,
 		)
 		if threeDimensional {
-			stlFileName := downloadsPath + "/" + fileName + ".stl"
-			stlFile, err := os.Create(stlFileName)
-			if err != nil {
-				slog.Error("Error creating STL file:", err)
-				return
-			}
-			defer stlFile.Close()
-
+			// creating a list of fractal images in parallel
 			imageChan := make(chan struct {
 				Index int // to ensure proper indexing of channel
 				Image *image.RGBA
@@ -119,49 +110,12 @@ var juliaEvolveCommand = &cobra.Command{
 				images[i.Index] = i
 			}
 
-			shift := 0.0
-
-			if writeBinary {
-				var totPixels int = 0
-				for _, imgStruct := range images {
-					totPixels += utils.GetNumNonTransparentPixels(imgStruct.Image)
-				}
-
-				// Write 80-byte header
-				header := make([]byte, et.HeaderSize)
-				stlFile.Write(header)
-				// Write 4-byte facet count (uint32)
-				numFacets := uint32(totPixels * 12) // Assuming 12 facets for a cube
-				binary.Write(stlFile, binary.LittleEndian, numFacets)
-
-				for i, imgStruct := range images {
-					utils.ProgressBar(i, len(images))
-					et.DrawJuliaSet3DBinary(imgStruct.Image, stlFile, shift)
-					shift += 1
-				}
-
-			} else if solid {
-				stlFile.WriteString("solid GeneratedModel\n")
-				for i, imgStruct := range images { //add to the stl file(seqentially)
-					utils.ProgressBar(i, len(images))
-					et.DrawJuliaSet3DFilled(imgStruct.Image, stlFile, shift)
-					shift += 1
-				}
-				stlFile.WriteString("endsolid GeneratedModel\n")
-			} else {
-				stlFile.WriteString("solid GeneratedModel\n")
-				var imgList []image.Image
-				for _,imgStruct := range images {
-					imgList = append(imgList, imgStruct.Image)
-				}
-
-				for i,img := range imgList {
-					utils.ProgressBar(i, len(imgList))
-					et.DrawJuliaSet3DEmpty(img, imgList[i+1:], stlFile, shift)
-					shift += 1
-				}
-				stlFile.WriteString("endsolid GeneratedModel\n")
+			var imgList []image.Image
+			for _, imgStruct := range images {
+				imgList = append(imgList, imgStruct.Image)
 			}
+
+			IMGS.STLControlFlow(writeBinary, solid, imgList, fileName)
 		} else {
 			et.EvolveVideo(
 				utils.CreateTwoParamEquation(juliaEquation),
@@ -188,23 +142,20 @@ func init() {
 	// regualar julia set
 	juliaCommand.Flags().StringVarP(&juliaEquation, "equation", "e", "", "[REQUIRED] The equation for your julia set")
 	juliaCommand.Flags().BoolVarP(&colored, "color","c", false, "[OPTIONAL] Default Grey Scale")
-	juliaCommand.Flags().StringVarP(&fileName, "fileName", "F", "", "[REQUIRED] The file name in the downloads folder")
 
-	juliaCommand.Flags().Float64VarP(&zoom, "zoom","z",4,"[Optional] Set the zoom; smaller value is more zoomed in")
+	juliaCommand.Flags().Float64VarP(&zoom, "zoom","z",4,"[OPTIONAL] Set the zoom; smaller value is more zoomed in")
 
 	juliaCommand.Flags().IntVarP(&maxItr, "maxItr","m",1000,"[OPTIONAL] Set max iterations for time escape")
 
 	juliaCommand.Flags().StringVarP(&centerPointString, "centerPoint","p","0+0i", "[Optional] Set the center point for the fractal")
 
 	juliaCommand.MarkFlagRequired("equation")
-	juliaCommand.MarkFlagRequired("fileName")
 
 	// julia evolution flags
 	juliaEvolveCommand.Flags().StringVarP(&juliaEquation, "equation", "e", "", "[REQUIRED] The parameterized equation for your julia set")
 	juliaEvolveCommand.Flags().StringVarP(&cInitString, "initialComplex","P","", "[REQUIRED] Set the intial parameter for a julia evolution")
 	juliaEvolveCommand.Flags().StringVarP(&cIncrementString, "complexIncrement","i","", "[REQUIRED] Set the increment for the evolution of the parameter")
 	juliaEvolveCommand.Flags().IntVarP(&numIncrements, "numIncrements", "n",10,"[REQUIRED] the number of evolution steps to take")
-	juliaEvolveCommand.Flags().StringVarP(&fileName, "fileName", "F", "", "[REQUIRED] The file name in the downloads folder")
 
 	juliaEvolveCommand.MarkFlagsRequiredTogether("equation", "initialComplex", "complexIncrement", "numIncrements")
 
@@ -212,8 +163,8 @@ func init() {
 	juliaEvolveCommand.Flags().BoolVarP(&writeBinary, "binary","b", false, "[OPTIONAL] save the stl as a binary")
 	juliaEvolveCommand.Flags().BoolVarP(&solid, "solid","s", false, "[OPTIONAL] write the stl as a completely solid object(much larger file size)")
 	juliaEvolveCommand.Flags().IntVarP(&fps, "fps", "f", 10, "[OPTIONAL] The framerate of the video.")
-	juliaEvolveCommand.Flags().Float64VarP(&zoom, "zoom","z",4,"[Optional] Set the zoom; smaller value is more zoomed in")
+	juliaEvolveCommand.Flags().Float64VarP(&zoom, "zoom","z",4,"[OPTIONAL] Set the zoom; smaller value is more zoomed in")
 
 	juliaEvolveCommand.Flags().IntVarP(&maxItr, "maxItr","m",1000,"[OPTIONAL] Set max iterations for time escape")
-	juliaEvolveCommand.Flags().StringVarP(&centerPointString, "centerPoint","p","0+0i", "[Optional] Set the center point for the fractal")
+	juliaEvolveCommand.Flags().StringVarP(&centerPointString, "centerPoint","p","0+0i", "[OPTIONAL] Set the center point for the fractal")
 }
