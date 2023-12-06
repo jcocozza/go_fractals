@@ -1,9 +1,9 @@
 package utils
 
 import (
+	"log/slog"
 	"strconv"
 	"strings"
-	"fmt"
 )
 
 //Return a list of float64 from a string list representation:
@@ -16,7 +16,7 @@ func ParseCommaDelimitedStr(cds string) []float64 {
 	for _, element := range elements {
 		num, err := strconv.ParseFloat(element, 64)
 		if err != nil {
-			fmt.Println("Error parsing element:", err)
+			slog.Error("Error parsing element:", err)
 			continue // TODO this currently just skips this element if there's an error
 		}
 		data = append(data, num)

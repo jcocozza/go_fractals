@@ -1,3 +1,5 @@
 .vscode/
 .DS_Store
 video/im*
+
+.depreciated/
