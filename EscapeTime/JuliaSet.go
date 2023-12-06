@@ -3,14 +3,12 @@ package EscapeTime
 import (
 	"fmt"
 	"image"
-	"image/png"
-	"log/slog"
 	"math/cmplx"
 	"os"
-	"os/exec"
 	"sync"
 
 	"github.com/jcocozza/go_fractals/utils"
+	IMGS "github.com/jcocozza/go_fractals/images"
 )
 
 type JuliaSet struct {
@@ -59,15 +57,7 @@ func (s *JuliaSet) Draw(path string, width,height int) *image.RGBA {
 		}
 	}
 	//DrawText(img, "Your Text Here", width-150, 20)
-	file, err := os.Create(path)
-	if err != nil {
-		panic(err)
-	}
-	defer file.Close()
-	err = png.Encode(file, img)
-	if err != nil {
-		panic(err)
-	}
+	IMGS.SavePNG(img, path)
 	return img
 }
 
@@ -86,18 +76,7 @@ func (s *JuliaSet) DrawFiltered(path string, width,height int) *image.RGBA {
 			}
 		}
 	}
-
-	/*
-	file, err := os.Create(path)
-	if err != nil {
-		panic(err)
-	}
-	defer file.Close()
-	err = png.Encode(file, img)
-	if err != nil {
-		panic(err)
-	}
-	*/
+	//IMGS.SavePNG(img, path)
 	return img
 }
 
@@ -161,21 +140,5 @@ func EvolveVideo(functionClass func(complex128,complex128) complex128, cInit, cI
 	wg.Wait()
 
 	inputPattern := dir+"/image%01d.png"
-	outputVideo := outputPath
-
-    cmd := exec.Command("ffmpeg",
-        "-framerate", fmt.Sprint(fps),            // Frame rate
-        "-i", inputPattern,           			  // Input image pattern
-        "-c:v", "libx264",            			  // Video codec
-        "-pix_fmt", "yuv420p",        			  // Pixel format
-        outputVideo)
-
-	out, err := cmd.CombinedOutput()
-
-	if err != nil {
-		slog.Error("Error running ffmpeg command:", err)
-		slog.Error("Combined Output: " + string(out))
-		return
-	}
-	utils.DeleteFiles("video", "imag*.png") // clean up images afterwards
+	IMGS.CreateVideo(inputPattern, outputPath,fps)
 }

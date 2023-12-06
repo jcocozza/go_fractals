@@ -1,10 +1,14 @@
-package EscapeTime
+package images
 
 import (
 	"encoding/binary"
 	"fmt"
 	"image"
+	"io"
+	"log/slog"
 	"os"
+
+	"github.com/jcocozza/go_fractals/utils"
 )
 
 const (
@@ -15,104 +19,151 @@ const (
 	endLoop     = "    endloop\n"
 	endFacet    = "  endfacet\n"
 
-	HeaderSize  = 80
+	headerSize  = 80
 )
 
-// function to get alpha value of a pixel, handling out-of-bounds gracefully
-func getAlpha(img image.Image, x, y int) uint32 {
-	bounds := img.Bounds()
-	if x >= bounds.Min.X && x < bounds.Max.X && y >= bounds.Min.Y && y < bounds.Max.Y {
-		pixel := img.At(x, y)
-		_, _, _, alpha := pixel.RGBA()
-		return alpha
-	}
-	return 0
-}
+type STLWriteMethod func(*os.File,float64,float64,float64)
+type ExtrusionMethod func(image.Image,[]image.Image, *os.File, float64, STLWriteMethod) int
 
-// if any adjacent points are transparent, then the non-transparent pixel is on the boundary
-func isTransition(img image.Image, x,y int) bool {
-	alphaLeft := getAlpha(img, x-1, y)
-	alphaRight := getAlpha(img, x+1, y)
-	alphaUp := getAlpha(img, x, y-1)
-	alphaDown := getAlpha(img, x, y+1)
-
-	return alphaLeft == 0 || alphaRight == 0 || alphaUp == 0 || alphaDown == 0
-}
-
-// check if the pixel in the current image will be "covered" by pixels in other images
-// the specific use case is in an ordered list of images
-// x,y will be apoint in the current image, and images will be a list of future images
-func isCovered(x,y int, images []image.Image) bool {
-	for _, img := range images {
-		pixel := img.At(x, y)
-			_, _, _, alpha := pixel.RGBA()
-			if alpha > 0 {
-				return true
-			}
-	}
-	return false
-}
-
-// for each non-transparent pixel in the image, draw a thickend, filled julia set
-func DrawJuliaSet3DFilled(img image.Image, stlFile *os.File, shift float64) {
-	// Loop through pixels and generate cuboids for non-transparent pixels
-	bounds := img.Bounds()
-	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
-		for x := bounds.Min.X; x < bounds.Max.X; x++ {
-			pixel := img.At(x, y)
-			_, _, _, alpha := pixel.RGBA()
-
-			if alpha > 0 {
-				writeCube(stlFile, float64(x), float64(y), shift)
-			}
+// master func for create stl's
+func STLControlFlow(writeBinary, solid bool, imgList []image.Image, fileName string) {
+	if writeBinary {
+		if solid {
+			createSTLBinary(imgList, fileName, extrudeImageSolid)
+		} else {
+			createSTLBinary(imgList, fileName, extrudeImageHollow)
+		}
+	} else {
+		if solid {
+			createSTL(imgList, fileName, extrudeImageSolid)
+		} else {
+			createSTL(imgList, fileName, extrudeImageHollow)
 		}
 	}
 }
 
+func createSTL(imgList []image.Image, fileName string, extrustionMethod ExtrusionMethod) {
+	downloadsPath := utils.GetDownloadDir()
+	stlFileName := downloadsPath + "/" + fileName + ".stl"
+	stlFile, err := os.Create(stlFileName)
+	if err != nil {
+		slog.Error("Error creating STL file:", err)
+		return
+		}
+	defer stlFile.Close()
 
-// for each non-transparent pixel in the image, draw a thickend, outline of the set
-// images is the list of images that will be stacked on top of the passed img.
-func DrawJuliaSet3DEmpty(img image.Image, images []image.Image, stlFile *os.File, shift float64) {
-	// Loop through pixels and generate cuboids for non-transparent pixels
+	shift := 0.0
+	stlFile.WriteString("solid GeneratedModel\n")
+	for i, img := range imgList {
+		extrustionMethod(img, imgList[i+1:], stlFile, shift, writeCube)
+		shift += 1
+
+		utils.ProgressBar(i,len(imgList))
+	}
+	stlFile.WriteString("endsolid GeneratedModel\n")
+}
+
+func createSTLBinary(imgList []image.Image, fileName string, extrustionMethod ExtrusionMethod) {
+	downloadsPath := utils.GetDownloadDir()
+	stlFileName := downloadsPath + "/" + fileName + ".stl"
+	stlFile, err := os.Create(stlFileName)
+	if err != nil {
+		slog.Error("Error creating STL file:", err)
+		return
+		}
+	defer stlFile.Close()
+
+	header := make([]byte, headerSize)
+	stlFile.Write(header)
+	// Record the position after writing the header
+	facetCountPos, err := stlFile.Seek(0, io.SeekCurrent)
+	if err != nil {
+		slog.Error("Error seeking file:", err)
+		return
+	}
+	// Write a temporary placeholder for the facet count
+	tmpFacetCount := make([]byte, 4)
+	stlFile.Write(tmpFacetCount)
+
+	shift := 0.0
+	totalFacets := 0
+	for i, img := range imgList {
+		totalFacets += extrustionMethod(img, imgList[i+1:], stlFile, shift, writeCubeBinary)
+		shift += 1
+		utils.ProgressBar(i,len(imgList))
+	}
+
+
+	// Move back to the position to write the actual facet count
+	_, err = stlFile.Seek(facetCountPos, io.SeekStart)
+	if err != nil {
+		slog.Error("Error seeking file:", err)
+		return
+	}
+
+	// Write the actual facet count
+	binary.LittleEndian.PutUint32(tmpFacetCount, uint32(totalFacets))
+	stlFile.Write(tmpFacetCount)
+
+
+	// Move back to the end of the file
+	_, err = stlFile.Seek(0, io.SeekEnd)
+	if err != nil {
+		slog.Error("Error seeking file:", err)
+		return
+	}
+}
+
+// for each non-transparent pixel in the image, draw a thickend set
+func extrudeImageSolid(img image.Image, images []image.Image, stlFile *os.File, shift float64, method STLWriteMethod) int {
 	bounds := img.Bounds()
+	var totalFacets int
 	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
 		for x := bounds.Min.X; x < bounds.Max.X; x++ {
 			pixel := img.At(x, y)
 			_, _, _, alpha := pixel.RGBA()
 
 			if alpha > 0 {
-				if !isCovered(x,y, images) {
-					writeCube(stlFile, float64(x), float64(y), shift)
-				} else if isTransition(img, x,y) {
-					writeCube(stlFile, float64(x), float64(y), shift)
+				method(stlFile, float64(x), float64(y), shift)
+				totalFacets += 12 //every square has 12 facets
+			}
+		}
+	}
+	return totalFacets
+}
+
+// for each non-transparent pixel in the image, draw a thickend, outline of the set
+// images is the list of images that will be stacked on top of the passed img.
+func extrudeImageHollow(img image.Image, images []image.Image, stlFile *os.File, shift float64, method STLWriteMethod) int {
+	bounds := img.Bounds()
+	var totalFacets int
+	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
+		for x := bounds.Min.X; x < bounds.Max.X; x++ {
+			pixel := img.At(x, y)
+			_, _, _, alpha := pixel.RGBA()
+
+			if alpha > 0 {
+				if !IsCovered(x,y, images) {
+					method(stlFile, float64(x), float64(y), shift)
+					totalFacets += 12
+				} else if IsTransition(img, x,y) {
+					method(stlFile, float64(x), float64(y), shift)
+					totalFacets += 12
 				}
 			}
 		}
 	}
+	return totalFacets
 }
 
-
-func DrawJuliaSet3DBinary(img image.Image, stlFile *os.File, shift float64) {
-	// Loop through pixels and generate cuboids for non-transparent pixels
-	bounds := img.Bounds()
-	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
-		for x := bounds.Min.X; x < bounds.Max.X; x++ {
-			pixel := img.At(x, y)
-			_, _, _, alpha := pixel.RGBA()
-
-			if alpha > 0 {
-				WriteCubeBinary(stlFile, float32(x), float32(y), float32(shift))
-			}
-		}
-	}
-}
-
+// helper for writeCubeBinary()
 func writeNormalBinary(file *os.File, normal [3]float32) {
 	binary.Write(file, binary.LittleEndian, &normal[0])
 	binary.Write(file, binary.LittleEndian, &normal[1])
 	binary.Write(file, binary.LittleEndian, &normal[2])
 }
 
+// helper for writeCubeBinary()
 func writeFacetBinary(file *os.File, vertices [3][3]float32) {
 	for _, vertex := range vertices {
 		for _, value := range vertex {
@@ -123,7 +174,12 @@ func writeFacetBinary(file *os.File, vertices [3][3]float32) {
 }
 
 // draw a cube at an (x,y,z) coordinate in binary
-func WriteCubeBinary(file *os.File, x,y,z float32) {
+func writeCubeBinary(file *os.File, x64,y64,z64 float64) {
+
+	x := float32(x64)
+	y := float32(y64)
+	z := float32(z64)
+
 	var normal [3]float32
 	var vertices [3][3]float32
 
@@ -234,7 +290,6 @@ func WriteCubeBinary(file *os.File, x,y,z float32) {
 	}
 	writeNormalBinary(file, normal)
 	writeFacetBinary(file, vertices)
-
 }
 
 // draw a cube at an (x,y,z) coordinate
