@@ -298,16 +298,16 @@ Equations are built in the same way as Julia set equations.
 ### Example
 
 The classic Mandelbrot set:
-`go_fractals mandelbrot -e "z*z + c" -F mandelbrot`
+`$ go_fractals mandelbrot -e "z*z + c" -F mandelbrot`
 
 ![image](./examples/mandelbrot/mandelbrot.png)
 
 The burning ship:
-`go_fractals mandelbrot -e "complex(math.Abs(real(z)),math.Abs(imag(z)))*complex(math.Abs(real(z)),math.Abs(imag(z))) + c" -F burningShip`
+`$ go_fractals mandelbrot -e "complex(math.Abs(real(z)),math.Abs(imag(z)))*complex(math.Abs(real(z)),math.Abs(imag(z))) + c" -F burningShip`
 
 ![image](./examples/mandelbrot/burningShip.png)
 
 The burning ship, zoomed with color, centered at -1.75 + .025i:
-`go_fractals mandelbrot -e "complex(math.Abs(real(z)),math.Abs(imag(z)))*complex(math.Abs(real(z)),math.Abs(imag(z))) + c" -F burningZoomColor -p "-1.75-0.025i" --color -z .08`
+`$ go_fractals mandelbrot -e "complex(math.Abs(real(z)),math.Abs(imag(z)))*complex(math.Abs(real(z)),math.Abs(imag(z))) + c" -F burningZoomColor -p "-1.75-0.025i" --color -z .08`
 
 ![image](./examples/mandelbrot/burningZoomColor.png)
