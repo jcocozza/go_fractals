@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 )
@@ -10,7 +10,7 @@ func DeleteFiles(dirPath string, filePattern string) {
     // Use filepath.Glob to get a list of matching file paths
     matchingFiles, err := filepath.Glob(filepath.Join(dirPath, filePattern))
     if err != nil {
-        fmt.Println("Error:", err)
+        slog.Error("Error:", err)
         return
     }
 
@@ -18,10 +18,10 @@ func DeleteFiles(dirPath string, filePattern string) {
     for _, filePath := range matchingFiles {
         err := os.Remove(filePath)
         if err != nil {
-            fmt.Printf("Error deleting %s: %v\n", filePath, err)
+            slog.Error("Error deleting %s: %v\n", filePath, err)
         } else {
+            slog.Debug("Deleted " + filePath)
             continue
-            //fmt.Printf("Deleted %s\n", filePath)
         }
     }
 }

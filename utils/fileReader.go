@@ -2,7 +2,7 @@ package utils
 
 import (
 	"bufio"
-	"fmt"
+	"log/slog"
 	"os"
 	"regexp"
 )
@@ -15,7 +15,7 @@ func Reader(path string, pattern string) [][]string {
 	file, err := os.Open(path)
 
 	if err != nil {
-		fmt.Println("Error Opening File", err)
+		slog.Error("Error Opening File", err)
 		return [][]string{}
 	}
 	defer file.Close()
@@ -34,7 +34,7 @@ func Reader(path string, pattern string) [][]string {
 
 	// Check for scanner errors
 	if err := scanner.Err(); err != nil {
-		fmt.Println("Error reading file:", err)
+		slog.Error("Error reading file:", err)
 		return [][]string{}
 	}
 	return matches
