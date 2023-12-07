@@ -155,7 +155,7 @@ var ifsEvolveCMD = &cobra.Command{
 
 
 func init() {
-	rootCmd.AddCommand(ifsCMD)
+	RootCmd.AddCommand(ifsCMD)
 
 	ifsCMD.AddCommand(ifsImg)
 	ifsCMD.AddCommand(ifsEvolveCMD)

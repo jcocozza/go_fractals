@@ -49,7 +49,7 @@ var mandelbrotCommand = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(mandelbrotCommand)
+	RootCmd.AddCommand(mandelbrotCommand)
 
 	mandelbrotCommand.Flags().StringVarP(&mandelbrotEquation, "equation", "e", "", "[REQUIRED] The equation for your mandelbrot set")
 	mandelbrotCommand.Flags().BoolVarP(&colored, "color","c", false, "[OPTIONAL] Default Grey Scale")

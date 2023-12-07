@@ -136,8 +136,8 @@ var juliaEvolveCommand = &cobra.Command{
 
 
 func init() {
-	rootCmd.AddCommand(juliaCommand)
-	rootCmd.AddCommand(juliaEvolveCommand)
+	RootCmd.AddCommand(juliaCommand)
+	RootCmd.AddCommand(juliaEvolveCommand)
 
 	// regualar julia set
 	juliaCommand.Flags().StringVarP(&juliaEquation, "equation", "e", "", "[REQUIRED] The equation for your julia set")
