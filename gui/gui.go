@@ -204,7 +204,7 @@ func GUI() {
 					cmdArgs = append(cmdArgs, []string{
 						"--centerPoint", getEntryValue(centerPointEntry),
 						"--complexIncrement", getEntryValue(cIncrementEntry),
-						"--equation", getEntryValue(juliaEqnEntry),
+						"--equation", getEntryValue(mandelbrotEqnEntry),
 						"--fps", getEntryValue(fpsEntry),
 						"--initialComplex", getEntryValue(cInitEntry),
 						"--maxItr", getEntryValue(maxItrEntry),
@@ -217,7 +217,7 @@ func GUI() {
 					cmdArgs = append(cmdArgs, []string{
 						"--centerPoint", getEntryValue(centerPointEntry),
 						"--complexIncrement", getEntryValue(cIncrementEntry),
-						"--equation", getEntryValue(juliaEqnEntry),
+						"--equation", getEntryValue(mandelbrotEqnEntry),
 						"--fps", getEntryValue(fpsEntry),
 						"--initialComplex", getEntryValue(cInitEntry),
 						"--maxItr", getEntryValue(maxItrEntry),

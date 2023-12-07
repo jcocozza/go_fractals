@@ -3,12 +3,12 @@ module github.com/jcocozza/go_fractals
 go 1.21.1
 
 require (
+	fyne.io/fyne/v2 v2.4.2
 	github.com/spf13/cobra v1.7.0
 	gonum.org/v1/gonum v0.14.0
 )
 
 require (
-	fyne.io/fyne/v2 v2.4.2 // indirect
 	fyne.io/systray v1.10.1-0.20231115130155-104f5ef7839e // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fredbi/uri v1.0.0 // indirect
