@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"log/slog"
 
-	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 	"github.com/jcocozza/go_fractals/cmd"
+	"github.com/jcocozza/go_fractals/utils"
 )
 
 func showPage(w fyne.Window, content fyne.CanvasObject) {
@@ -39,6 +40,31 @@ func GUI() {
 
 	heightEntry := widget.NewEntry()
 	heightEntry.SetPlaceHolder(fmt.Sprintf("%d",cmd.HeightDefault))
+
+	// ifs
+	ifsPathEntry := widget.NewEntry()
+	ifsPathEntry.SetPlaceHolder(cmd.IfsPathDefault)
+
+	var algorithm string
+	algorithms := []string{"probabilistic", "deterministic"}
+	algorithmChoices := widget.NewRadioGroup(algorithms, func(s string) {
+		algorithm = s
+	})
+
+	numItrsEntry := widget.NewEntry()
+	numItrsEntry.SetPlaceHolder(string(cmd.NumIterationsDefault))
+
+	numPointsEntry := widget.NewEntry()
+	numPointsEntry.SetPlaceHolder(string(cmd.NumPointsDefault))
+
+	probabilitiesEntry := widget.NewEntry()
+	probabilitiesEntry.SetPlaceHolder(utils.ListToString(cmd.ProbabilitiesListDefault))
+
+	numStacksEntry := widget.NewEntry()
+	numStacksEntry.SetPlaceHolder(string(cmd.NumStacksDefault))
+
+	thicknessEntry := widget.NewEntry()
+	thicknessEntry.SetPlaceHolder("15")
 
 	// julia & mandelbrot
 	juliaEqnEntry := widget.NewEntry()
@@ -78,6 +104,18 @@ func GUI() {
 	var page2 func(string) *fyne.Container
 	var page3 func(string,string) *fyne.Container
 
+	ifsForm := &widget.Form{
+		Items: []*widget.FormItem{
+			{Text: "ifs path", Widget: ifsPathEntry},
+			{Text: "algorithm", Widget: algorithmChoices},
+			{Text: "number of iterations", Widget: numItrsEntry},
+			{Text: "number of initial points", Widget: numPointsEntry},
+			{Text: "probability list", Widget: probabilitiesEntry},
+			{Text: "number of stacks", Widget: numStacksEntry},
+			{Text: "thickness", Widget: thicknessEntry},
+		},
+		OnSubmit: func() {},
+	}
 	mandelbrotForm := &widget.Form{
 		Items: []*widget.FormItem{
 			{Text: "Equation", Widget: mandelbrotEqnEntry},
@@ -87,7 +125,6 @@ func GUI() {
 			{Text: "", Widget: coloredEntry},},
 		OnSubmit: func() {},
 	}
-
 	juliaForm := &widget.Form{
 		Items: []*widget.FormItem{
 			{Text: "Equation", Widget: juliaEqnEntry},
@@ -154,6 +191,7 @@ func GUI() {
 			generalForm,
 		)
 		if fractalType == "ifs" {
+			pg3.Add(ifsForm)
 			if outputType == "image" {
 
 			} else if outputType == "video" {
@@ -185,9 +223,34 @@ func GUI() {
 			if fractalType == "ifs" {
 				cmdArgs = append(cmdArgs, "ifs")
 				if outputType == "image" {
+					cmdArgs = append(cmdArgs, "image")
 				} else if outputType == "video" {
+					cmdArgs = append(cmdArgs, "evolve")
 				} else if outputType == "stl" {
+					cmdArgs = append(cmdArgs, "evolve")
+
+					cmdArgs = append(cmdArgs, []string{
+						"--numStacks", getEntryValue(numStacksEntry),
+						"--thickness", getEntryValue(thicknessEntry),
+					}...)
 				}
+
+				if algorithm == "probabilistic" {
+					cmdArgs = append(cmdArgs, "--algo-p")
+				} else if algorithm == "deterministic" {
+					cmdArgs = append(cmdArgs, "--algo-d")
+				}
+				cmdArgs = append(cmdArgs, []string{
+					"--path", getEntryValue(ifsPathEntry),
+					"--numItr", getEntryValue(numItrsEntry),
+					"--numPoints", getEntryValue(numPointsEntry),
+				}...)
+
+				if getEntryValue(probabilitiesEntry) != "" {
+					cmdArgs = append(cmdArgs,
+						[]string{"--probabilities", getEntryValue(probabilitiesEntry)}...,)
+				}
+
 			} else if fractalType == "julia" {
 				if outputType == "image" {
 					cmdArgs = append(cmdArgs, "julia")

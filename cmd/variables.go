@@ -15,7 +15,7 @@ var HeightDefault int = 1000
 
 // IFS variables
 var ifsPath string
-var IfsPathDefault string = ""
+var IfsPathDefault string = "path/to/my.ifs"
 
 var numIterations int
 var NumIterationsDefault int = 1
