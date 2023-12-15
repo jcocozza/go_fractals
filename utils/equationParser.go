@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"plugin"
 	"strings"
+	"time"
 )
 
 /*
@@ -56,38 +57,41 @@ func compileToSharedObject(inputFile, outputFile string) error {
 }
 
 func getSym(funcString string) plugin.Symbol {
-	// Write the function string to a temporary file
-	fileName := "dynamic_function.go"
-	err := writeToFile(fileName, funcString)
-	if err != nil {
-		slog.Error("Error writing to file:", err)
-		return nil
-	}
-	defer os.Remove(fileName)
-	// Compile the Go file to a shared object (.so) file
-	soFileName := "dynamic_function.so"
-	err = compileToSharedObject(fileName, soFileName)
-	if err != nil {
-		slog.Error("Error compiling to shared object:", err)
-		return nil
-	}
-	defer os.Remove(soFileName)
+    // Generate a unique file name using a timestamp
+    timestamp := time.Now().UnixNano()
+    fileName := fmt.Sprintf("dynamic_function_%d.go", timestamp)
+    err := writeToFile(fileName, funcString)
+    if err != nil {
+        slog.Error("Error writing to file:", err)
+        return nil
+    }
+    defer os.Remove(fileName)
 
-	// Load the plugin
-	p, err := plugin.Open(soFileName)
-	if err != nil {
-		slog.Error("Error opening plugin:", err)
-		return nil
-	}
+    // Compile the Go file to a shared object (.so) file
+    soFileName := fmt.Sprintf("dynamic_function_%d.so", timestamp)
+    err = compileToSharedObject(fileName, soFileName)
+    if err != nil {
+        slog.Error("Error compiling to shared object:", err)
+        return nil
+    }
+    defer os.Remove(soFileName)
 
-	// Look up the symbol (function) from the plugin
-	sym, err := p.Lookup("ParsedTransformation")
-	if err != nil {
-		slog.Error("Error looking up symbol:", err)
-		return nil
-	}
-	return sym
+    // Load the plugin
+    p, err := plugin.Open(soFileName)
+    if err != nil {
+        slog.Error("Error opening plugin:", err)
+        return nil
+    }
+
+    // Look up the symbol (function) from the plugin
+    sym, err := p.Lookup("ParsedTransformation")
+    if err != nil {
+        slog.Error("Error looking up symbol:", err)
+        return nil
+    }
+    return sym
 }
+
 
 // handle 1 parameter functions
 func CreateOneParamEquation(eqnInput string) OneParamEquation {
