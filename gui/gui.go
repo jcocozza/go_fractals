@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
+	"fyne.io/fyne/v2/canvas"
 	"github.com/jcocozza/go_fractals/cmd"
 	"github.com/jcocozza/go_fractals/utils"
 )
@@ -22,6 +23,35 @@ func getEntryValue(w *widget.Entry) string {
 		return w.PlaceHolder
 	}
 	return w.Text
+}
+
+func loadImage(fileNameEntry *widget.Entry, outputType string) *fyne.Container {
+
+	var containerOut *fyne.Container
+
+	filePath := utils.GetDownloadDir() + "/" + getEntryValue(fileNameEntry)
+	slog.Info("loading fractal image from: "+ filePath)
+	if outputType == "image" {
+		filePath += ".png"
+		img := canvas.NewImageFromFile(filePath)
+		img.FillMode = canvas.ImageFillOriginal
+
+		containerOut = container.NewHBox(
+			img,
+		)
+	} else if outputType == "video" {
+		filePath += ".mp4"
+		containerOut = container.NewHBox(
+			widget.NewCard("Video Saved to: " + filePath, "", nil),
+		)
+	} else if outputType == "stl" {
+		filePath += ".stl"
+		containerOut = container.NewHBox(
+			widget.NewCard("stl Saved to: " + filePath, "", nil),
+		)
+	}
+
+	return containerOut
 }
 
 func GUI() {
@@ -211,12 +241,10 @@ func GUI() {
 				pg3.Add(juliaEvolveForm)
 				pg3.Add(stlForm)
 			}
-
 		} else if fractalType == "mandelbrot" {
 			pg3.Add(mandelbrotForm)
 		}
 
-		//cmdArgs = []string{"julia","-e", "1/(z*z + .72i)", "-F", "testGUI"}
 		generateButton := widget.NewButton("Generate Fractal", func() {
 			slog.Info("generating fractal")
 			var cmdArgs []string
@@ -250,7 +278,6 @@ func GUI() {
 					cmdArgs = append(cmdArgs,
 						[]string{"--probabilities", getEntryValue(probabilitiesEntry)}...,)
 				}
-
 			} else if fractalType == "julia" {
 				if outputType == "image" {
 					cmdArgs = append(cmdArgs, "julia")
@@ -305,6 +332,7 @@ func GUI() {
 					"--zoom", getEntryValue(zoomEntry),}...
 				)
 			}
+
 			if coloredEntry.Checked {
 				cmdArgs = append(cmdArgs, "--color")
 			}
@@ -319,14 +347,17 @@ func GUI() {
 			if err := cmd.RootCmd.Execute(); err != nil {
 				slog.Error("error", err)
 			}
+			page4 := container.NewVBox(
+				loadImage(fileNameEntry, outputType),
+				startOverBtn,
+			)
+			showPage(w, page4)
 		})
 
 		pg3.Add(generateButton)
 		pg3.Add(startOverBtn)
-
 		return pg3
 	}
-
 
 	showPage(w, page1)
 	w.ShowAndRun()
