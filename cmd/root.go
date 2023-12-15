@@ -14,10 +14,10 @@ var RootCmd = &cobra.Command{
 }
 
 func init() {
-	RootCmd.PersistentFlags().IntVarP(&width, "width", "W", 1000, "[OPTIONAL] Set width")
-	RootCmd.PersistentFlags().IntVarP(&height, "height", "H", 1000, "[OPTIONAL] Set height")
-	RootCmd.PersistentFlags().IntVarP(&fps, "fps", "f", 10, "[OPTIONAL] The framerate of the video.")
-	RootCmd.PersistentFlags().StringVarP(&fileName, "fileName", "F", "fractalOutput", "[OPTIONAL] Set file name")
+	RootCmd.PersistentFlags().IntVarP(&width, "width", "W", WidthDefault, "[OPTIONAL] Set width")
+	RootCmd.PersistentFlags().IntVarP(&height, "height", "H", HeightDefault, "[OPTIONAL] Set height")
+	RootCmd.PersistentFlags().IntVarP(&fps, "fps", "f", FpsDefault, "[OPTIONAL] The framerate of the video.")
+	RootCmd.PersistentFlags().StringVarP(&fileName, "fileName", "F", FileNameDefault, "[OPTIONAL] Set file name")
 }
 
 func Execute() {

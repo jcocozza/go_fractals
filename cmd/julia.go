@@ -140,31 +140,31 @@ func init() {
 	RootCmd.AddCommand(juliaEvolveCommand)
 
 	// regualar julia set
-	juliaCommand.Flags().StringVarP(&juliaEquation, "equation", "e", "", "[REQUIRED] The equation for your julia set")
-	juliaCommand.Flags().BoolVarP(&colored, "color","c", false, "[OPTIONAL] Default Grey Scale")
+	juliaCommand.Flags().StringVarP(&juliaEquation, "equation", "e", JuliaEquationDefault, "[REQUIRED] The equation for your julia set")
+	juliaCommand.Flags().BoolVarP(&colored, "color","c", ColoredDefault, "[OPTIONAL] Default Grey Scale")
 
-	juliaCommand.Flags().Float64VarP(&zoom, "zoom","z",4,"[OPTIONAL] Set the zoom; smaller value is more zoomed in")
+	juliaCommand.Flags().Float64VarP(&zoom, "zoom","z",ZoomDefault,"[OPTIONAL] Set the zoom; smaller value is more zoomed in")
 
-	juliaCommand.Flags().IntVarP(&maxItr, "maxItr","m",1000,"[OPTIONAL] Set max iterations for time escape")
+	juliaCommand.Flags().IntVarP(&maxItr, "maxItr","m",MaxItrDefault,"[OPTIONAL] Set max iterations for time escape")
 
-	juliaCommand.Flags().StringVarP(&centerPointString, "centerPoint","p","0+0i", "[Optional] Set the center point for the fractal")
+	juliaCommand.Flags().StringVarP(&centerPointString, "centerPoint","p",CenterPointStringDefault, "[Optional] Set the center point for the fractal")
 
 	juliaCommand.MarkFlagRequired("equation")
 
 	// julia evolution flags
-	juliaEvolveCommand.Flags().StringVarP(&juliaEquation, "equation", "e", "", "[REQUIRED] The parameterized equation for your julia set")
-	juliaEvolveCommand.Flags().StringVarP(&cInitString, "initialComplex","P","", "[REQUIRED] Set the intial parameter for a julia evolution")
-	juliaEvolveCommand.Flags().StringVarP(&cIncrementString, "complexIncrement","i","", "[REQUIRED] Set the increment for the evolution of the parameter")
-	juliaEvolveCommand.Flags().IntVarP(&numIncrements, "numIncrements", "n",10,"[REQUIRED] the number of evolution steps to take")
+	juliaEvolveCommand.Flags().StringVarP(&juliaEquation, "equation", "e", JuliaEquationDefault, "[REQUIRED] The parameterized equation for your julia set")
+	juliaEvolveCommand.Flags().StringVarP(&cInitString, "initialComplex","P", CInitStringDefault, "[REQUIRED] Set the intial parameter for a julia evolution")
+	juliaEvolveCommand.Flags().StringVarP(&cIncrementString, "complexIncrement","i",CIncrementStringDefault, "[REQUIRED] Set the increment for the evolution of the parameter")
+	juliaEvolveCommand.Flags().IntVarP(&numIncrements, "numIncrements", "n", NumIncrementsDefault,"[REQUIRED] the number of evolution steps to take")
 
 	juliaEvolveCommand.MarkFlagsRequiredTogether("equation", "initialComplex", "complexIncrement", "numIncrements")
 
-	juliaEvolveCommand.Flags().BoolVarP(&threeDimensional, "threeDim","d", false, "[OPTIONAL] Create a 3d stl file of the evolution")
-	juliaEvolveCommand.Flags().BoolVarP(&writeBinary, "binary","b", false, "[OPTIONAL] save the stl as a binary")
-	juliaEvolveCommand.Flags().BoolVarP(&solid, "solid","s", false, "[OPTIONAL] write the stl as a completely solid object(much larger file size)")
-	juliaEvolveCommand.Flags().IntVarP(&fps, "fps", "f", 10, "[OPTIONAL] The framerate of the video.")
-	juliaEvolveCommand.Flags().Float64VarP(&zoom, "zoom","z",4,"[OPTIONAL] Set the zoom; smaller value is more zoomed in")
+	juliaEvolveCommand.Flags().BoolVarP(&threeDimensional, "threeDim","d", ThreeDimensionalDefault, "[OPTIONAL] Create a 3d stl file of the evolution")
+	juliaEvolveCommand.Flags().BoolVarP(&writeBinary, "binary","b", WriteBinaryDefault, "[OPTIONAL] save the stl as a binary")
+	juliaEvolveCommand.Flags().BoolVarP(&solid, "solid","s", SolidDefault, "[OPTIONAL] write the stl as a completely solid object(much larger file size)")
+	juliaEvolveCommand.Flags().IntVarP(&fps, "fps", "f", FpsDefault, "[OPTIONAL] The framerate of the video.")
+	juliaEvolveCommand.Flags().Float64VarP(&zoom, "zoom","z",ZoomDefault,"[OPTIONAL] Set the zoom; smaller value is more zoomed in")
 
-	juliaEvolveCommand.Flags().IntVarP(&maxItr, "maxItr","m",1000,"[OPTIONAL] Set max iterations for time escape")
-	juliaEvolveCommand.Flags().StringVarP(&centerPointString, "centerPoint","p","0+0i", "[OPTIONAL] Set the center point for the fractal")
+	juliaEvolveCommand.Flags().IntVarP(&maxItr, "maxItr","m",MaxItrDefault,"[OPTIONAL] Set max iterations for time escape")
+	juliaEvolveCommand.Flags().StringVarP(&centerPointString, "centerPoint","p",CenterPointStringDefault, "[OPTIONAL] Set the center point for the fractal")
 }

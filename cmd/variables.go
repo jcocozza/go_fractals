@@ -8,10 +8,10 @@ var fileName string
 var FileNameDefault string = "goFractalsOutput"
 
 var width int
-var WidthDefault int = 1000
+var WidthDefault int = 600
 
 var height int
-var HeightDefault int = 1000
+var HeightDefault int = 600
 
 // IFS variables
 var ifsPath string
@@ -55,10 +55,10 @@ var threeDimensional bool
 var ThreeDimensionalDefault bool = false
 
 var cInitString string
-var CINitStringDefault = ""
+var CInitStringDefault = "0+0i"
 
 var cIncrementString string
-var CIncrementStringDefault string = ""
+var CIncrementStringDefault string = "0.01+.01i"
 
 var numIncrements int
 var NumIncrementsDefault int = 10

@@ -160,25 +160,25 @@ func init() {
 	ifsCMD.AddCommand(ifsImg)
 	ifsCMD.AddCommand(ifsEvolveCMD)
 
-	ifsCMD.PersistentFlags().BoolVar(&algorithmProbabilistic, "algo-p", false, "[OPTIONAL] Use the probabilistic algorithm")
-	ifsCMD.PersistentFlags().BoolVar(&algorithmDeterministic, "algo-d", true, "[OPTIONAL] Use the deterministic algorithm")
+	ifsCMD.PersistentFlags().BoolVar(&algorithmProbabilistic, "algo-p", AlgorithmProbabilisticDefault, "[OPTIONAL] Use the probabilistic algorithm")
+	ifsCMD.PersistentFlags().BoolVar(&algorithmDeterministic, "algo-d", AlgorithmDeterministicDefault, "[OPTIONAL] Use the deterministic algorithm")
 	ifsCMD.MarkFlagsMutuallyExclusive("algo-p", "algo-d")
 
-	ifsCMD.PersistentFlags().StringVarP(&ifsPath, "path", "p", "", "[REQUIRED] The path to your iterated function system file")
+	ifsCMD.PersistentFlags().StringVarP(&ifsPath, "path", "p", IfsPathDefault, "[REQUIRED] The path to your iterated function system file")
 	ifsCMD.MarkFlagRequired("path")
 
-	ifsCMD.PersistentFlags().IntVarP(&numIterations, "numItr", "n", 1, "[OPTIONAL] The number of iterations you want to use.")
+	ifsCMD.PersistentFlags().IntVarP(&numIterations, "numItr", "n", NumIterationsDefault, "[OPTIONAL] The number of iterations you want to use.")
 
-	ifsCMD.PersistentFlags().Float64SliceVar(&probabilitiesList, "probabilities", []float64{}, "[OPTIONAL - comma separated] Specify probabilities of transformations. Must add to 1. If none will calculated based on matrices. Note that a determinant of zero can cause unexpected things.")
+	ifsCMD.PersistentFlags().Float64SliceVar(&probabilitiesList, "probabilities", ProbabilitiesListDefault, "[OPTIONAL - comma separated] Specify probabilities of transformations. Must add to 1. If none will calculated based on matrices. Note that a determinant of zero can cause unexpected things.")
 	ifsCMD.MarkFlagsMutuallyExclusive("algo-d", "probabilities")
 
-	ifsCMD.PersistentFlags().IntVarP(&numPoints, "numPoints", "z", 1, "[OPTIONAL] The number of initial points.")
+	ifsCMD.PersistentFlags().IntVarP(&numPoints, "numPoints", "z", NumPointsDefault, "[OPTIONAL] The number of initial points.")
 
-	ifsImg.Flags().BoolVarP(&random, "random","r", false, "[OPTIONAL] Create a random 2D Iterated Function system using the probabilistic algorithm")
-	ifsImg.Flags().IntVarP(&numTransforms, "numTransforms", "t", 2, "[OPTIONAL] The number of transforms to randomly generate.")
+	ifsImg.Flags().BoolVarP(&random, "random","r", RandomDefault, "[OPTIONAL] Create a random 2D Iterated Function system using the probabilistic algorithm")
+	ifsImg.Flags().IntVarP(&numTransforms, "numTransforms", "t", NumTransformsDefault, "[OPTIONAL] The number of transforms to randomly generate.")
 
-	ifsEvolveCMD.Flags().BoolVarP(&threeDimensional, "threeDim","d", false, "[OPTIONAL] Create a 3d stl file of the evolution")
-	ifsEvolveCMD.PersistentFlags().IntVarP(&numStacks, "numStacks", "k", 1, "[OPTIONAL] The number of stacks to generate")
-	ifsEvolveCMD.PersistentFlags().Float32VarP(&thickness, "thickness","T", 15, "[OPTIONAL] Specify the thickness the stack layer")
+	ifsEvolveCMD.Flags().BoolVarP(&threeDimensional, "threeDim","d", ThreeDimensionalDefault, "[OPTIONAL] Create a 3d stl file of the evolution")
+	ifsEvolveCMD.PersistentFlags().IntVarP(&numStacks, "numStacks", "k", NumStacksDefault, "[OPTIONAL] The number of stacks to generate")
+	ifsEvolveCMD.PersistentFlags().Float32VarP(&thickness, "thickness","T", ThicknessDefault, "[OPTIONAL] Specify the thickness the stack layer")
 	ifsEvolveCMD.MarkFlagsRequiredTogether("threeDim","numStacks", "thickness")
 }
