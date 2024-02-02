@@ -117,19 +117,37 @@ var juliaEvolveCommand = &cobra.Command{
 
 			IMGS.STLControlFlow(writeBinary, solid, imgList, fileName)
 		} else {
-			et.EvolveVideo(
-				utils.CreateTwoParamEquation(juliaEquation),
-				utils.ParseComplexString(cInitString),
-				utils.ParseComplexString(cIncrementString),
-				numIncrements,
-				fps,
-				downloadsPath + "/" + fileName + ".mp4",
-				utils.ParseComplexString(centerPointString),
-				maxItr,
-				zoom,
-				width,
-				height,
-			)
+			if colored {
+				et.EvolveVideo(
+					utils.CreateTwoParamEquation(juliaEquation),
+					utils.ParseComplexString(cInitString),
+					utils.ParseComplexString(cIncrementString),
+					numIncrements,
+					fps,
+					downloadsPath + "/" + fileName + ".mp4",
+					utils.ParseComplexString(centerPointString),
+					maxItr,
+					zoom,
+					width,
+					height,
+					et.BurningColor,
+				)
+			} else {
+				et.EvolveVideo(
+					utils.CreateTwoParamEquation(juliaEquation),
+					utils.ParseComplexString(cInitString),
+					utils.ParseComplexString(cIncrementString),
+					numIncrements,
+					fps,
+					downloadsPath + "/" + fileName + ".mp4",
+					utils.ParseComplexString(centerPointString),
+					maxItr,
+					zoom,
+					width,
+					height,
+					et.GreyScale,
+				)
+			}
 		}
 	},
 }
@@ -167,4 +185,6 @@ func init() {
 
 	juliaEvolveCommand.Flags().IntVarP(&maxItr, "maxItr","m",1000,"[OPTIONAL] Set max iterations for time escape")
 	juliaEvolveCommand.Flags().StringVarP(&centerPointString, "centerPoint","p","0+0i", "[OPTIONAL] Set the center point for the fractal")
+
+	juliaEvolveCommand.Flags().BoolVarP(&colored, "color","c", false, "[OPTIONAL] Default Grey Scale")
 }

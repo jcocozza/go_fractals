@@ -108,7 +108,7 @@ func JuliaEvolution(functionClass utils.TwoParamEquation, cInit, cIncrement comp
 }
 
 // 2d evolution through parameter space
-func EvolveVideo(functionClass func(complex128,complex128) complex128, cInit, cIncrement complex128, numIncrements int, fps int, outputPath string, center complex128, maxItr int, zoom float64, width, height int) {
+func EvolveVideo(functionClass func(complex128,complex128) complex128, cInit, cIncrement complex128, numIncrements int, fps int, outputPath string, center complex128, maxItr int, zoom float64, width, height int, colorGen colorGenerator) {
 	dir, _ := os.MkdirTemp("","video")
 	defer os.RemoveAll(dir)
 
@@ -128,7 +128,7 @@ func EvolveVideo(functionClass func(complex128,complex128) complex128, cInit, cI
 				return cmplx.Abs(z) > 2
 			}
 
-			tmpJulia := JuliaSet{currTransformation, escapeCondition, GreyScale, center ,maxItr, zoom}
+			tmpJulia := JuliaSet{currTransformation, escapeCondition, colorGen, center ,maxItr, zoom}
 
 			filename := dir + fmt.Sprintf("/image%d.png", i)
 			tmpJulia.Draw(filename, width, height)
