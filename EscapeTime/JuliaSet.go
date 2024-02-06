@@ -57,7 +57,9 @@ func (s *JuliaSet) Draw(path string, width,height int) *image.RGBA {
 		}
 	}
 	//DrawText(img, "Your Text Here", width-150, 20)
-	IMGS.SavePNG(img, path)
+	if path != "" {
+		IMGS.SavePNG(img, path)
+	}
 	return img
 }
 
@@ -137,6 +139,27 @@ func EvolveVideo(functionClass func(complex128,complex128) complex128, cInit, cI
 		varyingC += cIncrement
 	}
 
+	wg.Wait()
+
+	inputPattern := dir+"/image%01d.png"
+	IMGS.CreateVideo(inputPattern, outputPath,fps)
+}
+
+func EvolveVideoFromList(jsList []*JuliaSet, width, height int, outputPath string, fps int) {
+	dir, _ := os.MkdirTemp("","video")
+	defer os.RemoveAll(dir)
+
+	var wg sync.WaitGroup
+	for i := range jsList {
+		wg.Add(1)
+
+		go func(j int) {
+			defer wg.Done()
+			defer utils.ProgressBar(j, len(jsList))
+			filename := dir + fmt.Sprintf("/image%d.png", j)
+			jsList[j].Draw(filename, width, height)
+		}(i)
+	}
 	wg.Wait()
 
 	inputPattern := dir+"/image%01d.png"

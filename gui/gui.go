@@ -30,7 +30,12 @@ func initPages(w fyne.Window) (*fyne.Container,*fyne.Container,*fyne.Container,*
 		widget.NewButton("start", func() {
 			showPage(w, p1)
 		}),
-	),)
+	),
+	widget.NewButton("Draw Mandelbrot evolution", func ()  {
+		cont := DrawOnImage(w)
+		showPage(w, cont)
+	}),
+)
 
 	// TODO ensure that the start over button actually resets things
 	startOverBtn = widget.NewButton("Start Over", func() {
@@ -53,7 +58,8 @@ func GUI() {
 	initForms()
 
 	p0,_,_,_ := initPages(w)
-
 	showPage(w, p0)
+
+	//w.SetContent(cont)
 	w.ShowAndRun()
 }

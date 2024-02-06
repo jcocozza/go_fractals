@@ -2,13 +2,22 @@ package gui
 
 import (
 	"fmt"
-	"log/slog"
+	"image"
+	"image/color"
 
-	"fyne.io/fyne/v2/canvas"
+	//"image"
+	//"image/color"
+	"log/slog"
+	"math/cmplx"
+
+	//"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
+	et "github.com/jcocozza/go_fractals/EscapeTime"
 	"github.com/jcocozza/go_fractals/utils"
 )
 
@@ -143,4 +152,80 @@ func handleOutPut(fileNameEntry *widget.Entry, outputType string) *fyne.Containe
 	}
 
 	return containerOut
+}
+
+type holdable struct {
+    widget.Button
+	Image *image.RGBA
+	PointList []*image.Point
+}
+func newHoldableButton(img *image.RGBA) *holdable {
+    button := &holdable{
+		Image: img,
+	}
+	button.ExtendBaseWidget(button)
+    return button
+}
+
+func (h *holdable) CreateRenderer() fyne.WidgetRenderer {
+	imag := canvas.NewImageFromImage(h.Image)
+
+	imag.SetMinSize(fyne.NewSquareSize(1000))
+	imag.FillMode = canvas.ImageFillOriginal
+	return widget.NewSimpleRenderer(imag)
+}
+
+func (h *holdable) MouseMoved(me *desktop.MouseEvent) {
+	if me.Button == 1 {
+		// these will never be anything other than ints, strange feature of fyne
+		x := int(me.Position.X)
+		y := int(me.Position.Y)
+
+		pt := &image.Point{X: x, Y: y}
+
+		h.Image.Set(x,y, color.RGBA{0,255,0, 255})
+		h.PointList = append(h.PointList, pt)
+		h.Refresh()
+	}
+}
+
+func DrawOnImage(w fyne.Window) *fyne.Container {
+	mbs := et.MandelbrotSet{
+		Transformation: utils.CreateTwoParamEquation("z*z + c"),
+		EscapeCondition: func(z complex128) bool {
+			return cmplx.Abs(z) > 2
+		},
+		InitPoint: complex(0,0),
+		Center: complex(0,0),
+		ColorGenerator: et.GreyScale,
+		MaxItr: 1000,
+		Zoom: 4,
+	}
+
+	img := mbs.DrawImg(800,800)
+
+	btn := newHoldableButton(img)
+	cont := container.NewVBox(
+		btn,
+		widget.NewButton("done", func ()  {
+			fmt.Println("creating trans...")
+			cList := utils.PointListToComplexList(btn.PointList, 800, 800, 4, complex(0,0))
+			jsList := CreateJuliaSets(cList)
+			//EscapeTime.EvolveVideoFromList(jsList, 1000,1000, "/Users/josephcocozza/Downloads/output_video.mp4", 10)
+			imPairs := CreateImagePairs(jsList, btn.PointList, mbs)
+			CreateVideo(imPairs)
+
+		}),
+		widget.NewButton("reset", func ()  {
+			img = mbs.DrawImg(800,800)
+			btn.Image = img
+			btn.PointList = []*image.Point{}
+			btn.Refresh()
+			w.Canvas().Refresh(btn)
+		}),
+	)
+
+	//w.Resize(fyne.NewSize(1000, 1000))
+	//cont.Resize(fyne.NewSize(w.Canvas().Size().Width, w.Canvas().Size().Height))
+	return cont
 }
