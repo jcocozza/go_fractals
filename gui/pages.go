@@ -212,8 +212,9 @@ func DrawOnImage(w fyne.Window) *fyne.Container {
 			cList := utils.PointListToComplexList(btn.PointList, 800, 800, 4, complex(0,0))
 			jsList := CreateJuliaSets(cList)
 			//EscapeTime.EvolveVideoFromList(jsList, 1000,1000, "/Users/josephcocozza/Downloads/output_video.mp4", 10)
-			imPairs := CreateImagePairs(jsList, btn.PointList, mbs)
-			CreateVideo(imPairs)
+			//imPairs := CreateImagePairs(jsList, btn.PointList, mbs)
+			//CreateVideo(imPairs)
+			CreateImagePairsParallel(jsList, btn.PointList, mbs)
 
 		}),
 		widget.NewButton("reset", func ()  {
