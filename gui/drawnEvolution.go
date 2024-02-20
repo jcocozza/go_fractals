@@ -9,9 +9,9 @@ import (
 	"os"
 	"sync"
 
-	"github.com/jcocozza/go_fractals/EscapeTime"
-	"github.com/jcocozza/go_fractals/images"
-	"github.com/jcocozza/go_fractals/utils"
+	"github.com/jcocozza/go_fractals/internal/EscapeTime"
+	"github.com/jcocozza/go_fractals/internal/images"
+	"github.com/jcocozza/go_fractals/internal/utils"
 )
 
 func CreateJuliaSets(cList []complex128) []*EscapeTime.JuliaSet {

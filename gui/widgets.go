@@ -9,7 +9,7 @@ import (
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/widget"
 	"github.com/jcocozza/go_fractals/cmd"
-	"github.com/jcocozza/go_fractals/utils"
+	"github.com/jcocozza/go_fractals/internal/utils"
 )
 
 var (
@@ -92,7 +92,7 @@ func initWidgets() {
 	fpsEntry.SetPlaceHolder(fmt.Sprintf("%d",cmd.FpsDefault))
 
 	fileNameEntry = widget.NewEntry()
-	fileNameEntry.SetPlaceHolder(cmd.FileNameDefault)
+	fileNameEntry.SetPlaceHolder(cmd.FilePathDefault)
 
 	widthEntry = widget.NewEntry()
 	widthEntry.SetPlaceHolder(fmt.Sprintf("%d",cmd.WidthDefault))

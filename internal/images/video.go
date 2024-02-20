@@ -7,7 +7,7 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/jcocozza/go_fractals/utils"
+	"github.com/jcocozza/go_fractals/internal/utils"
 )
 
 // create a video from a set of images

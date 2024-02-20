@@ -6,9 +6,9 @@ import (
 	"math/cmplx"
 	"sync"
 
-	et "github.com/jcocozza/go_fractals/EscapeTime"
-	"github.com/jcocozza/go_fractals/utils"
-	IMGS "github.com/jcocozza/go_fractals/images"
+	et "github.com/jcocozza/go_fractals/internal/EscapeTime"
+	"github.com/jcocozza/go_fractals/internal/utils"
+	IMGS "github.com/jcocozza/go_fractals/internal/images"
 
 	"github.com/spf13/cobra"
 )
@@ -19,9 +19,10 @@ var juliaCommand = &cobra.Command{
 	Long: "Pass in a complex function for the julia set",
 	Args: cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
-
-		downloadsPath := utils.GetDownloadDir()
-
+		if filePath == FilePathDefault {
+			downloads := utils.GetDownloadDir()
+			filePath = downloads + "/" + FilePathDefault + utils.GenerateUUID()
+		}
 
 		var js et.JuliaSet
 		if colored {
@@ -47,8 +48,8 @@ var juliaCommand = &cobra.Command{
 				Zoom: zoom,
 			}
 		}
-
-		js.Draw(downloadsPath+"/"+fileName+".png", width, height)
+		filePath += ".png"
+		js.Draw(filePath, width, height)
 	},
 }
 
@@ -58,7 +59,10 @@ var juliaEvolveCommand = &cobra.Command{
 	Long: "Create a video or 3d stl of the julia set evolving through parameter space",
 	Args: cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
-		downloadsPath := utils.GetDownloadDir()
+		if filePath == FilePathDefault {
+			downloads := utils.GetDownloadDir()
+			filePath = downloads + "/" + FilePathDefault + utils.GenerateUUID()
+		}
 
 		juliaSetlist := et.JuliaEvolution(
 			utils.CreateTwoParamEquation(juliaEquation),
@@ -115,7 +119,7 @@ var juliaEvolveCommand = &cobra.Command{
 				imgList = append(imgList, imgStruct.Image)
 			}
 
-			IMGS.STLControlFlow(writeBinary, solid, imgList, fileName)
+			IMGS.STLControlFlow(writeBinary, solid, imgList, filePath + ".stl")
 		} else {
 			et.EvolveVideo(
 				utils.CreateTwoParamEquation(juliaEquation),
@@ -123,7 +127,7 @@ var juliaEvolveCommand = &cobra.Command{
 				utils.ParseComplexString(cIncrementString),
 				numIncrements,
 				fps,
-				downloadsPath + "/" + fileName + ".mp4",
+				filePath + ".mp4",
 				utils.ParseComplexString(centerPointString),
 				maxItr,
 				zoom,

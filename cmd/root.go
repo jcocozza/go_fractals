@@ -17,7 +17,7 @@ func init() {
 	RootCmd.PersistentFlags().IntVarP(&width, "width", "W", WidthDefault, "[OPTIONAL] Set width")
 	RootCmd.PersistentFlags().IntVarP(&height, "height", "H", HeightDefault, "[OPTIONAL] Set height")
 	RootCmd.PersistentFlags().IntVarP(&fps, "fps", "f", FpsDefault, "[OPTIONAL] The framerate of the video.")
-	RootCmd.PersistentFlags().StringVarP(&fileName, "fileName", "F", FileNameDefault, "[OPTIONAL] Set file name")
+	RootCmd.PersistentFlags().StringVarP(&filePath, "filePath", "F", filePath, "[OPTIONAL] The path of the file that will be written. If nothing is passed, will default to the users downloads folder.")
 }
 
 func Execute() {

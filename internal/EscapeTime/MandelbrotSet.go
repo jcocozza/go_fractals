@@ -5,7 +5,7 @@ import (
 	"image/png"
 	"os"
 
-	"github.com/jcocozza/go_fractals/utils"
+	"github.com/jcocozza/go_fractals/internal/utils"
 )
 
 type MandelbrotSet struct {
@@ -13,7 +13,7 @@ type MandelbrotSet struct {
 	InitPoint complex128
 	Center complex128
 	EscapeCondition escapeCondition
-	ColorGenerator colorGenerator
+	ColorGenerator ColorGenerator
 	MaxItr int
 	Zoom float64
 }

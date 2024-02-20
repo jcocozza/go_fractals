@@ -7,20 +7,20 @@ import (
 	"os"
 	"sync"
 
-	"github.com/jcocozza/go_fractals/utils"
-	IMGS "github.com/jcocozza/go_fractals/images"
+	"github.com/jcocozza/go_fractals/internal/utils"
+	IMGS "github.com/jcocozza/go_fractals/internal/images"
 )
 
 type JuliaSet struct {
 	Transformation utils.OneParamEquation
 	EscapeCondition escapeCondition
-	ColorGenerator colorGenerator
+	ColorGenerator ColorGenerator
 	Center complex128
 	MaxItr int
 	Zoom float64
 }
 
-func NewJuliaSet(transform utils.OneParamEquation, escape escapeCondition, colorGen colorGenerator, center complex128, maxItr int, zoom float64) *JuliaSet {
+func NewJuliaSet(transform utils.OneParamEquation, escape escapeCondition, colorGen ColorGenerator, center complex128, maxItr int, zoom float64) *JuliaSet {
 	return &JuliaSet{
 		Transformation: transform,
 		EscapeCondition: escape,

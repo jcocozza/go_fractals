@@ -4,7 +4,7 @@ import (
 	"image"
 	"image/color"
 
-	IMGS "github.com/jcocozza/go_fractals/images"
+	IMGS "github.com/jcocozza/go_fractals/internal/images"
 )
 
 type FractalImage struct {

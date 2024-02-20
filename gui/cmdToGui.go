@@ -4,7 +4,7 @@ import (
 	"log/slog"
 
 	"github.com/jcocozza/go_fractals/cmd"
-	"github.com/jcocozza/go_fractals/utils"
+	"github.com/jcocozza/go_fractals/internal/utils"
 )
 
 func ifsControlFlow(cmdArgs []string, outputType, algorithm string) []string {

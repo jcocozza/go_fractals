@@ -4,8 +4,8 @@ package cmd
 var fps int
 var FpsDefault int = 10
 
-var fileName string
-var FileNameDefault string = "goFractalsOutput"
+var filePath string
+var FilePathDefault string = "goFractalsOutput"
 
 var width int
 var WidthDefault int = 600

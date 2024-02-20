@@ -13,7 +13,7 @@ import (
 type escapeCondition func(complex128) bool
 
 // return a color based on escape time
-type colorGenerator func(int) color.RGBA
+type ColorGenerator func(int) color.RGBA
 
 // add text to an image
 func DrawText(img *image.RGBA, text string, x, y int) {

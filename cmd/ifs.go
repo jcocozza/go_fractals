@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"image"
 
-	IFS "github.com/jcocozza/go_fractals/IteratedFunctionSystems"
-	IMGS "github.com/jcocozza/go_fractals/images"
-	"github.com/jcocozza/go_fractals/utils"
+	IFS "github.com/jcocozza/go_fractals/internal/IteratedFunctionSystems"
+	IMGS "github.com/jcocozza/go_fractals/internal/images"
+	"github.com/jcocozza/go_fractals/internal/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -43,12 +43,16 @@ var ifsImg = &cobra.Command{
 	Long: "Pass in a file that contains an iterated function system",
 	Args: cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
-		downloadsPath := utils.GetDownloadDir()
-		filePath := downloadsPath + "/" + fileName + ".png"
+
+		if filePath == FilePathDefault {
+			downloads := utils.GetDownloadDir()
+			filePath = downloads + "/" + FilePathDefault + utils.GenerateUUID()
+		}
+
 		if random {
 			randIFS := IFS.GenerateRandomIFS(2, numTransforms)
 			pointsList := randIFS.RunProbabilistic(randIFS.CalculateProbabilities())
-			fractal := IFS.NewFractalImage(width, height, downloadsPath+"/random_fractal.png", pointsList)
+			fractal := IFS.NewFractalImage(width, height, filePath, pointsList)
 			fractal.WriteImage(filePath)
 			return
 		}
@@ -63,16 +67,16 @@ var ifsImg = &cobra.Command{
 		if algorithmProbabilistic {
 			if len(probabilitiesList) == 0 {
 				pointsList := newIfs.RunProbabilistic(newIfs.CalculateProbabilities())
-				fractal := IFS.NewFractalImage(width, height, downloadsPath+"/probabilistic_fractal.png", pointsList)
+				fractal := IFS.NewFractalImage(width, height, filePath, pointsList)
 				fractal.WriteImage(filePath)
 			} else {
 				pointsList := newIfs.RunProbabilistic(probabilitiesList)
-				fractal := IFS.NewFractalImage(width, height, downloadsPath+"/probabilistic_fractal.png", pointsList)
+				fractal := IFS.NewFractalImage(width, height, filePath, pointsList)
 				fractal.WriteImage(filePath)
 			}
 			} else if algorithmDeterministic {
 				pointsList := newIfs.RunDeterministic()
-				fractal := IFS.NewFractalImage(width, height, downloadsPath+"/deterministic_fractal.png", pointsList)
+				fractal := IFS.NewFractalImage(width, height, filePath, pointsList)
 				fractal.WriteImage(filePath)
 			} else {
 				panic("No other algorithm to use!!")
@@ -86,7 +90,11 @@ var ifsEvolveCMD = &cobra.Command{
 	Long:  "Create a video or 3d stl of the ifs",
 	Args: cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
-		downloadsPath := utils.GetDownloadDir()
+		if filePath == FilePathDefault {
+			downloads := utils.GetDownloadDir()
+			filePath = downloads + "/" + FilePathDefault + utils.GenerateUUID()
+		}
+
 		// create a new iterated function system
 		newIfs, _ := processIFS(ifsPath, probabilitiesList, numIterations, numPoints)
 		var imgList []image.Image
@@ -127,7 +135,7 @@ var ifsEvolveCMD = &cobra.Command{
 					imgList = append(imgList, fractal.Img)
 				}
 			}
-			IMGS.STLControlFlow(writeBinary, solid, imgList, fileName)
+			IMGS.STLControlFlow(writeBinary, solid, imgList, filePath + ".stl")
 		} else { // create a video
 			pointAccumulator := newIfs.InitialPoints
 			newPoints := newIfs.InitialPoints
@@ -146,9 +154,7 @@ var ifsEvolveCMD = &cobra.Command{
 				fractal := IFS.NewFractalImage(width, height, fmt.Sprintf("/image%d.png", i), pointAccumulator)
 				imgList = append(imgList, fractal.Img)
 			}
-
-			outPath := downloadsPath + "/" + fileName + ".mp4"
-			IMGS.VideoFromImages(imgList, outPath, fps)
+			IMGS.VideoFromImages(imgList, filePath + ".mp4", fps)
 		}
 	},
 }

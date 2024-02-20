@@ -8,7 +8,7 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/jcocozza/go_fractals/utils"
+	"github.com/jcocozza/go_fractals/internal/utils"
 )
 
 const (
@@ -26,26 +26,24 @@ type STLWriteMethod func(*os.File,float64,float64,float64)
 type ExtrusionMethod func(image.Image,[]image.Image, *os.File, float64, STLWriteMethod) int
 
 // master func for create stl's
-func STLControlFlow(writeBinary, solid bool, imgList []image.Image, fileName string) {
+func STLControlFlow(writeBinary, solid bool, imgList []image.Image, filePath string) {
 	if writeBinary {
 		if solid {
-			createSTLBinary(imgList, fileName, extrudeImageSolid)
+			createSTLBinary(imgList, filePath, extrudeImageSolid)
 		} else {
-			createSTLBinary(imgList, fileName, extrudeImageHollow)
+			createSTLBinary(imgList, filePath, extrudeImageHollow)
 		}
 	} else {
 		if solid {
-			createSTL(imgList, fileName, extrudeImageSolid)
+			createSTL(imgList, filePath, extrudeImageSolid)
 		} else {
-			createSTL(imgList, fileName, extrudeImageHollow)
+			createSTL(imgList, filePath, extrudeImageHollow)
 		}
 	}
 }
 
-func createSTL(imgList []image.Image, fileName string, extrustionMethod ExtrusionMethod) {
-	downloadsPath := utils.GetDownloadDir()
-	stlFileName := downloadsPath + "/" + fileName + ".stl"
-	stlFile, err := os.Create(stlFileName)
+func createSTL(imgList []image.Image, filePath string, extrustionMethod ExtrusionMethod) {
+	stlFile, err := os.Create(filePath)
 	if err != nil {
 		slog.Error("Error creating STL file:", err)
 		return
@@ -63,10 +61,8 @@ func createSTL(imgList []image.Image, fileName string, extrustionMethod Extrusio
 	stlFile.WriteString("endsolid GeneratedModel\n")
 }
 
-func createSTLBinary(imgList []image.Image, fileName string, extrustionMethod ExtrusionMethod) {
-	downloadsPath := utils.GetDownloadDir()
-	stlFileName := downloadsPath + "/" + fileName + ".stl"
-	stlFile, err := os.Create(stlFileName)
+func createSTLBinary(imgList []image.Image, filePath string, extrustionMethod ExtrusionMethod) {
+	stlFile, err := os.Create(filePath)
 	if err != nil {
 		slog.Error("Error creating STL file:", err)
 		return

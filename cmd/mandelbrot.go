@@ -3,8 +3,8 @@ package cmd
 import (
 	"math/cmplx"
 
-	et "github.com/jcocozza/go_fractals/EscapeTime"
-	"github.com/jcocozza/go_fractals/utils"
+	et "github.com/jcocozza/go_fractals/internal/EscapeTime"
+	"github.com/jcocozza/go_fractals/internal/utils"
 
 	"github.com/spf13/cobra"
 )
@@ -15,8 +15,10 @@ var mandelbrotCommand = &cobra.Command{
 	Long: "Pass in a complex function for the mandelbrot set",
 	Args: cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
-
-		downloadsPath := utils.GetDownloadDir()
+		if filePath == FilePathDefault {
+			downloads := utils.GetDownloadDir()
+			filePath = downloads + "/" + FilePathDefault + utils.GenerateUUID()
+		}
 
 		var mbs et.MandelbrotSet
 		if colored {
@@ -44,7 +46,7 @@ var mandelbrotCommand = &cobra.Command{
 				Zoom: zoom,
 			}
 		}
-		mbs.Draw(downloadsPath+"/"+fileName+".png", width, height)
+		mbs.Draw(filePath + ".png", width, height)
 	},
 }
 
@@ -53,7 +55,7 @@ func init() {
 
 	mandelbrotCommand.Flags().StringVarP(&mandelbrotEquation, "equation", "e", "", "[REQUIRED] The equation for your mandelbrot set")
 	mandelbrotCommand.Flags().BoolVarP(&colored, "color","c", false, "[OPTIONAL] Default Grey Scale")
-	mandelbrotCommand.Flags().StringVarP(&fileName, "fileName", "F", "", "[REQUIRED] The file name in the downloads folder")
+	//mandelbrotCommand.Flags().StringVarP(&filePath, "filePath", "F", "", "[OPTIONAL] The file path - defaults to the users downloads folder")
 
 	mandelbrotCommand.Flags().StringVarP(&centerPointString, "centerPoint","p","0+0i", "[Optional] Set the center point for the fractal")
 	mandelbrotCommand.Flags().Float64VarP(&zoom, "zoom","z",4,"[OPTIONAL] Set the zoom; smaller value is more zoomed in")
@@ -61,5 +63,5 @@ func init() {
 	mandelbrotCommand.Flags().IntVarP(&maxItr, "maxItr","m",1000,"[OPTIONAL] Set max iterations for time escape")
 
 	mandelbrotCommand.MarkFlagRequired("equation")
-	mandelbrotCommand.MarkFlagRequired("fileName")
+	//mandelbrotCommand.MarkFlagRequired("fileName")
 }

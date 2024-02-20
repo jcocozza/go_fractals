@@ -17,8 +17,8 @@ import (
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
-	et "github.com/jcocozza/go_fractals/EscapeTime"
-	"github.com/jcocozza/go_fractals/utils"
+	et "github.com/jcocozza/go_fractals/internal/EscapeTime"
+	"github.com/jcocozza/go_fractals/internal/utils"
 )
 
 var (
