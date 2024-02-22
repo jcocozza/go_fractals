@@ -9,5 +9,5 @@ func InitRoutes(r *gin.Engine) {
 	r.GET("/", func(ctx *gin.Context) {})
 
 	r.POST("/julia", controllers.JuliaHandler)
-
+	r.POST("/mandelbrot", controllers.MandelbrotHandler)
 }

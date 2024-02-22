@@ -9,20 +9,6 @@ import (
 	"github.com/jcocozza/go_fractals/internal/utils"
 )
 
-type ComplexFromTS struct {
-	Real float64 `json:"real"`
-	Imaginary float64 `json:"imaginary"`
-}
-func (cts *ComplexFromTS) ToComplex() complex128 {
-	return complex(cts.Real, cts.Imaginary)
-}
-func (cts *ComplexFromTS) ToString() string {
-	if cts.Imaginary < 0 {
-		return fmt.Sprint(cts.Real) + fmt.Sprint(cts.Imaginary) + "i"
-	}
-	return fmt.Sprint(cts.Real) + "+" + fmt.Sprint(cts.Imaginary) + "i"
-}
-
 type Julia struct {
     Equation string `json:"equation"`
     MaxEscapeIterations int `json:"max_escape_iterations"`
@@ -39,12 +25,6 @@ type Julia struct {
     Width int `json:"width"`
     Height int `json:"height"`
 	FilePath string `json:"file_path"`
-}
-
-type JuliaResponse struct {
-	ImagePath string
-	VideoPath string
-	StlPath string
 }
 
 func JuliaControlFlow(j Julia, uuid string) ([]string, []string, []string) {
