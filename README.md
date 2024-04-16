@@ -270,12 +270,16 @@ The stl models can also produce very cool 3d structures if you choose your path 
 
 `$ go_fractals julia-evolve -e "z*z + c" -P "-.5+0i" -n 65 -i ".008333+.008333i" -F exampleSTL3d -W 150 -H 150 --threeDim`
 
-If you have an 3d viewing software, I really recommend taking a look at the [stl file](./examples/julia/exampleSTL3d.stl) for the above generation.
+If you have a 3d viewing software, I really recommend taking a look at the [stl file](./examples/julia/exampleSTL3d.stl) for the above generation.
 Online [this stl viewer](https://www.viewstl.com/#!) was very useful for testing this project.
 
 Though it does not do it credit, here is an image of it.
 You can just begin to make out the evolution of the Julia sets over parameter space.
 ![png](./examples/julia/exampleSTL3d.png)
+
+If you have access to a 3d printer, that's were the fun really begins.
+3d printed it looks like this:
+![png](./examples/julia/julia_evolution.png)
 
 # Mandelbrot Sets
 
